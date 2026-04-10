@@ -1,0 +1,2729 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - Aura Pix Admin</title>
+    
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/pTdZt8kb/Chat-GPT-Image-12-de-mar-de-2026-17-42-57.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    </head>
+    
+<style>
+    /* 1. Personalização da Barra de Rolagem Minimalista */
+    ::-webkit-scrollbar { 
+        width: 5px; 
+        height: 5px; 
+    }
+    ::-webkit-scrollbar-track { 
+        background: transparent; 
+    }
+    ::-webkit-scrollbar-thumb { 
+        background: #1e293b; 
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    ::-webkit-scrollbar-thumb:hover { 
+        background: #334155; 
+    }
+    
+    /* 2. Utilitários de Scroll */
+    .no-scrollbar::-webkit-scrollbar { 
+        display: none; 
+    }
+    .no-scrollbar { 
+        -ms-overflow-style: none; 
+        scrollbar-width: none; 
+    }
+    
+    /* 3. Sistema de Notificações (Toasts) - CORREÇÃO DE EMPILHAMENTO */
+    #toast-container {
+        z-index: 10000; /* Garante que fique acima de qualquer modal */
+        pointer-events: none;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Espaço entre um alerta e outro */
+    }
+    #toast-container > div {
+        pointer-events: auto;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 
+                    0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 4. Animações de Transição de Seções */
+    .section-fade {
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 5. Estados do Modal (Refinados) */
+    .modal-enter { 
+        opacity: 1 !important; 
+        transform: scale(1) translateY(0) !important; 
+    }
+    .modal-exit { 
+        opacity: 0 !important; 
+        transform: scale(0.95) translateY(10px) !important; 
+    }
+
+    /* 6. Efeito de Glassmorphism Reforçado */
+    .glass-card {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* 7. Ajuste de Seleção de Texto */
+    ::selection {
+        background: rgba(99, 102, 241, 0.3);
+        color: #fff;
+    }
+
+    /* 8. Fix para inputs no Mobile (Evita zoom automático no iOS) */
+    @media screen and (max-width: 768px) {
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+    }
+</style>
+</head>
+<body class="bg-[#020617] text-slate-200 h-[100dvh] flex overflow-hidden font-sans relative antialiased selection:bg-indigo-500/30">
+
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-[#020617] flex flex-col items-center justify-center px-5 transition-opacity duration-500 overflow-hidden">
+        
+        <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-indigo-600/10 blur-[120px] rounded-full mix-blend-screen"></div>
+            <div class="absolute bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-fuchsia-600/10 blur-[120px] rounded-full mix-blend-screen"></div>
+        </div>
+        
+        <div class="bg-slate-900/40 border border-slate-800/60 p-8 md:p-12 rounded-[2.5rem] shadow-2xl backdrop-blur-2xl w-full max-w-[380px] text-center relative z-10 animate-in zoom-in-95 duration-500 flex flex-col items-center">
+            
+            <div class="w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-fuchsia-500/10 rounded-[1.5rem] mx-auto flex items-center justify-center mb-8 border border-white/5 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)] relative group">
+                <div class="absolute inset-0 bg-indigo-500/20 blur-xl rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" class="text-indigo-400 relative z-10" viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            
+            <h1 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400 italic tracking-tight mb-2">AURA PIX</h1>
+            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-10">Admin Control</p>
+            
+            <div class="w-full relative mb-8 group">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-500 group-focus-within:text-indigo-400 transition-colors" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <input 
+                    type="password" 
+                    id="admin-password" 
+                    placeholder="Chave de Acesso" 
+                    class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-center text-white font-semibold tracking-widest text-sm outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-inner placeholder-slate-600 focus:placeholder-transparent" 
+                    onkeypress="if(event.key === 'Enter') fazerLogin()"
+                >
+            </div>
+            
+            <button 
+                onclick="fazerLogin()" 
+                class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold uppercase tracking-[0.15em] text-xs py-4 rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(79,70,229,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(79,70,229,0.6)] active:scale-95 flex items-center justify-center gap-3"
+            >
+                Desbloquear
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            
+            <div class="h-6 mt-4 flex items-center justify-center">
+                <p id="login-error" class="text-red-400 text-[10px] font-bold uppercase tracking-widest hidden animate-in slide-in-from-bottom-2 flex items-center gap-1.5">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Chave Inválida
+                </p>
+            </div>
+        </div>
+    </div>
+
+    
+
+
+    <!-- ============================================================================== -->
+    <!-- 2. MENU LATERAL (SIDEBAR - OTIMIZADO PARA MOBILE E DESKTOP)                    -->
+    <!-- ============================================================================== -->
+    <!-- Overlay Escuro para Mobile (fecha o menu ao clicar fora) -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-[#020617]/80 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-all duration-300 md:hidden"></div>
+
+<aside id="sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-slate-950/95 backdrop-blur-2xl border-r border-white/5 flex flex-col z-[70] transform -translate-x-full md:translate-x-0 md:relative transition-transform duration-300 ease-in-out">
+    
+    <div class="h-[2px] w-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50"></div>
+
+    <div class="p-6 border-b border-white/5 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black text-white italic tracking-tighter flex items-center gap-2">
+                <span class="w-2 h-6 bg-indigo-500 rounded-full"></span>
+                AURA<span class="text-indigo-500">PIX</span>
+            </h1>
+            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 mt-1 ml-4">Admin Control</p>
+        </div>
+        
+        <button onclick="toggleSidebar()" class="md:hidden w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 border border-white/10">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
+    </div>
+    
+    <nav class="flex-1 px-4 py-8 space-y-2 overflow-y-auto no-scrollbar">
+        <button onclick="showSection('usuarios')" id="menu-usuarios" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold text-white bg-indigo-600 shadow-lg border border-indigo-500/50 transition-all">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            Gestão de Clientes
+        </button>
+
+        <button onclick="showSection('logs')" id="menu-logs" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"></path></svg>
+            Logs de Auditoria
+        </button>
+
+        <button onclick="showSection('broadcast')" id="menu-broadcast" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-linecap="round"></path></svg>
+            Alertas em Massa
+        </button>
+
+        <div class="h-px w-full bg-white/5 my-6"></div>
+
+        <button onclick="showSection('config')" id="menu-config" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke-linecap="round"></path></svg>
+            Taxas & Juros
+        </button>
+
+        <button onclick="showSection('banners')" id="menu-banners" class="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M21 15l-5-5L5 21"></path></svg>
+            Banners
+        </button>
+    </nav>
+
+    <div class="p-4 mt-auto">
+        <button onclick="fazerLogout()" class="w-full flex items-center justify-center gap-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-4 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all border border-red-500/20 active:scale-95">
+            Trancar Painel
+        </button>
+    </div>
+</aside>
+    <!-- ============================================================================== -->
+    <!-- 3. CONTEÚDO PRINCIPAL (DASHBOARD)                                              -->
+    <!-- ============================================================================== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative z-10 w-full bg-[#020617]">
+        
+        <header class="h-16 md:h-24 border-b border-slate-800/60 bg-slate-900/70 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 shrink-0 shadow-sm relative z-20">
+            
+            <div class="flex items-center gap-3 md:gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden w-10 h-10 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 active:scale-95 transition-all">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round">
+                        <path d="M4 12h16M4 6h16M4 18h10"/>
+                    </svg>
+                </button>
+                
+                <div class="flex items-center gap-3">
+                    <span class="hidden sm:block w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse"></span>
+                    <h2 class="text-lg md:text-2xl font-extrabold text-white truncate tracking-tight drop-shadow-sm" id="header-title">Central de Clientes</h2>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 md:gap-4">
+                
+                <button onclick="exportarCSV()" class="bg-slate-800/40 hover:bg-slate-700/80 active:scale-95 text-slate-300 hover:text-white font-medium py-2.5 md:py-3 px-3 md:px-5 rounded-xl transition-all border border-slate-700/80 hover:border-slate-600 hidden sm:flex items-center gap-2 text-xs md:text-sm group shadow-sm">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="group-hover:-translate-y-0.5 transition-transform duration-300">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <polyline points="7 10 12 15 17 10" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3" stroke-linecap="round" stroke-linejoin="round"></line>
+                    </svg>
+                    <span class="hidden md:inline tracking-wide">Exportar</span>
+                </button>
+
+                <button onclick="carregarUsuarios()" id="btn-sync" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold py-2.5 md:py-3 px-4 md:px-6 rounded-xl transition-all shadow-[0_4px_20px_-4px_rgba(79,70,229,0.5)] hover:shadow-[0_8px_25px_-4px_rgba(79,70,229,0.6)] flex items-center gap-2.5 text-xs md:text-sm disabled:opacity-70 disabled:active:scale-100 group border border-indigo-500/30">
+                    
+                    <svg id="icon-sync" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" class="group-hover:rotate-180 transition-transform duration-500 ease-in-out">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 3v5h5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    
+                    <svg id="icon-spinner" class="animate-spin hidden" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke="currentColor" d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    
+                    <span id="text-sync" class="hidden sm:inline tracking-wide">Sincronizar</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar pb-24 md:pb-8 w-full relative">
+            
+            <!-- ---------------------------------------------------- -->
+            <!-- SECÇÃO: UTILIZADORES (ATIVA POR DEFEITO)             -->
+            <!-- ---------------------------------------------------- -->
+            <div id="section-usuarios" class="block animate-in fade-in slide-in-from-bottom-4 duration-500">
+                
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                    
+                    <div onclick="setFiltro('todos')" class="bg-slate-900/40 backdrop-blur-md border border-white/5 p-5 md:p-6 rounded-[2rem] shadow-xl cursor-pointer hover:bg-slate-800/50 transition-all group relative overflow-hidden flex flex-col justify-between min-h-[120px]">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400 group-hover:text-indigo-400 transition-colors">Clientes Ativos</p>
+                            <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-3xl md:text-4xl font-black text-white" id="metric-users">0</h3>
+                    </div>
+
+                    <div onclick="setFiltro('pendentes')" class="bg-slate-900/40 backdrop-blur-md border border-white/5 p-5 md:p-6 rounded-[2rem] shadow-xl cursor-pointer hover:bg-slate-800/50 transition-all group relative overflow-hidden flex flex-col justify-between min-h-[120px]">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400 group-hover:text-orange-400 transition-colors">Em Análise</p>
+                            <div class="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform relative">
+                                <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span></span>
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-3xl md:text-4xl font-black text-white" id="metric-pendentes">0</h3>
+                    </div>
+
+                    <div class="bg-slate-900/40 backdrop-blur-md border border-white/5 p-5 md:p-6 rounded-[2rem] shadow-xl col-span-2 lg:col-span-1 flex flex-col justify-between min-h-[120px]">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400">Custódia</p>
+                            <div class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-2xl md:text-3xl font-black text-emerald-400" id="metric-saldo">R$ 0,00</h3>
+                    </div>
+
+                    <div class="bg-slate-900/40 backdrop-blur-md border border-white/5 p-5 md:p-6 rounded-[2rem] shadow-xl col-span-2 lg:col-span-1 flex flex-col justify-between min-h-[120px]">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400">Risco (Limites)</p>
+                            <div class="w-8 h-8 rounded-full bg-fuchsia-500/10 flex items-center justify-center text-fuchsia-400">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-2xl md:text-3xl font-black text-fuchsia-400" id="metric-limite">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                    
+                    <div class="flex bg-slate-900/60 backdrop-blur-md p-1.5 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar w-full lg:w-auto shrink-0 snap-x shadow-inner">
+                        <button onclick="setFiltro('todos')" id="btn-filtro-todos" class="px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-md transition-all shrink-0 snap-start">Todos</button>
+                        <button onclick="setFiltro('pendentes')" id="btn-filtro-pendentes" class="px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all border border-transparent shrink-0 snap-start">Em Análise</button>
+                        <button onclick="setFiltro('bloqueados')" id="btn-filtro-bloqueados" class="px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all border border-transparent shrink-0 snap-start">Bloqueados</button>
+                    </div>
+                    
+                    <div class="relative w-full lg:w-80 shrink-0">
+                        <svg class="absolute left-4 top-3.5 text-slate-500" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input type="text" id="search-input" onkeyup="debouncedSearch()" placeholder="Pesquisar cliente..." class="w-full bg-slate-900/60 backdrop-blur-md border border-white/5 rounded-2xl px-5 py-3 pl-11 text-sm text-white focus:border-indigo-500 focus:bg-slate-900 transition-all placeholder-slate-500 font-medium outline-none shadow-inner">
+                    </div>
+                </div>
+
+                <div id="status" class="mb-4 text-xs font-semibold text-slate-500 px-2 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Aguardando sincronização...
+                </div>
+                
+                <div class="bg-slate-900/40 rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 flex flex-col w-full backdrop-blur-md">
+                    <div class="overflow-x-auto w-full no-scrollbar">
+                        <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
+                            <thead class="text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-white/5 bg-slate-950/20">
+                                <tr>
+                                    <th onclick="setSort('nome')" class="px-6 py-5 cursor-pointer hover:text-indigo-400 transition-colors group">
+                                        <div class="flex items-center gap-2">Cliente <span id="sort-icon-nome" class="opacity-0 group-hover:opacity-100 transition-opacity">↕</span></div>
+                                    </th>
+                                    <th class="px-6 py-5">Identificação</th>
+                                    <th onclick="setSort('saldo')" class="px-6 py-5 text-right cursor-pointer hover:text-emerald-400 transition-colors group">
+                                        <div class="flex items-center justify-end gap-2">Saldo <span id="sort-icon-saldo" class="opacity-0 group-hover:opacity-100 transition-opacity">↕</span></div>
+                                    </th>
+                                    <th onclick="setSort('limitePix')" class="px-6 py-5 text-right cursor-pointer hover:text-fuchsia-400 transition-colors group">
+                                        <div class="flex items-center justify-end gap-2">Limite Pix <span id="sort-icon-limitePix" class="opacity-0 group-hover:opacity-100 transition-opacity">↕</span></div>
+                                    </th>
+                                    <th class="px-6 py-5 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-usuarios" class="divide-y divide-white/5">
+                                </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="bg-slate-950/20 px-6 py-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500" id="pagination-info">Mostrando 0 utilizadores</p>
+                        <div class="flex gap-2">
+                            <button onclick="mudarPagina(-1)" id="btn-prev-page" class="w-9 h-9 rounded-xl bg-slate-800/40 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+                            </button>
+                            <div id="pagination-numbers" class="flex gap-1.5"></div>
+                            <button onclick="mudarPagina(1)" id="btn-next-page" class="w-9 h-9 rounded-xl bg-slate-800/40 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-all">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------------------------------------------- -->
+            <!-- SECÇÃO: LOGS DE AUDITORIA (OCULTA POR DEFEITO)       -->
+            <!-- ---------------------------------------------------- -->
+            <div id="section-logs" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                
+                <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-5 mb-6 md:mb-8">
+                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-slate-900/40 backdrop-blur-md text-indigo-400 flex items-center justify-center border border-white/5 shadow-xl shrink-0 group">
+                        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Registro de Auditoria</h2>
+                        <p class="text-xs md:text-sm text-slate-400 mt-1 font-medium">Monitore todas as ações realizadas no painel administrativo.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/40 rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 flex flex-col w-full backdrop-blur-md">
+                    <div class="overflow-x-auto w-full no-scrollbar">
+                        <table class="w-full text-left text-sm whitespace-nowrap min-w-[700px]">
+                            <thead class="bg-slate-950/20 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-white/5">
+                                <tr>
+                                    <th class="px-6 py-5">Data / Hora</th>
+                                    <th class="px-6 py-5">Ação Realizada</th>
+                                    <th class="px-6 py-5">Detalhes / UID Afetado</th>
+                                    <th class="px-6 py-5">Admin Responsável</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-logs" class="divide-y divide-white/5">
+                                </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="bg-slate-950/20 px-6 py-4 border-t border-white/5 flex items-center justify-between">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Histórico mantido de forma segura</p>
+                        <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse shadow-[0_0_5px_rgba(16,185,129,0.8)]"></span>
+                            Protegido
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ---------------------------------------------------- -->
+            <!-- SECÇÃO: TRANSMISSÃO EM MASSA (BROADCAST PUSH)        -->
+            <!-- ---------------------------------------------------- -->
+ <div id="section-broadcast" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div class="bg-slate-900/40 rounded-[2.5rem] p-6 md:p-10 shadow-2xl border border-white/5 max-w-4xl mx-auto mt-4 md:mt-8 relative overflow-hidden backdrop-blur-xl">
+        
+        <div class="absolute -top-[30%] -right-[10%] w-[50%] h-[50%] bg-fuchsia-600/10 blur-[100px] rounded-full mix-blend-screen pointer-events-none"></div>
+
+        <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-5 mb-10 relative z-10">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-fuchsia-500/10 text-fuchsia-400 flex items-center justify-center border border-fuchsia-500/20 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
+                <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Transmissão Global</h2>
+                <p class="text-xs md:text-sm text-slate-400 mt-1 font-medium">Envie uma notificação push para todos os clientes do app simultaneamente.</p>
+            </div>
+        </div>
+
+        <div class="space-y-6 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2 ml-1">Título do Alerta</label>
+                    <input type="text" id="mass-push-titulo" placeholder="Ex: Limite Liberado! 🚀" class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-sm outline-none focus:border-fuchsia-500 focus:bg-slate-900/80 focus:ring-4 focus:ring-fuchsia-500/10 transition-all placeholder-slate-600 shadow-inner">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2 ml-1">Estilo Visual</label>
+                    <div class="relative">
+                        <select id="mass-push-tipo" class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-sm outline-none focus:border-fuchsia-500 focus:bg-slate-900/80 focus:ring-4 focus:ring-fuchsia-500/10 transition-all appearance-none shadow-inner cursor-pointer font-medium">
+                            <option value="info">ℹ️ Informativo (Azul)</option>
+                            <option value="sucesso">✅ Sucesso (Verde)</option>
+                            <option value="aviso">⚠️ Importante (Laranja)</option>
+                            <option value="pix">⚡ Pix Enviado (Ícone Zap)</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-400">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2 ml-1">Mensagem da Notificação</label>
+                <textarea id="mass-push-mensagem" rows="3" placeholder="Escreva a mensagem que aparecerá na tela do cliente..." class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-sm outline-none focus:border-fuchsia-500 focus:bg-slate-900/80 focus:ring-4 focus:ring-fuchsia-500/10 transition-all resize-none placeholder-slate-600 shadow-inner leading-relaxed"></textarea>
+            </div>
+
+            <div id="mass-push-progress-container" class="hidden bg-slate-950/50 p-6 rounded-[2rem] border border-white/5 space-y-4 shadow-inner">
+                <div class="flex justify-between items-center">
+                    <span id="mass-push-status-text" class="text-xs font-bold text-fuchsia-400 animate-pulse uppercase tracking-wider">Disparando Alertas...</span>
+                    <span id="mass-push-count" class="text-[10px] font-black text-white bg-slate-800 px-3 py-1 rounded-full border border-slate-700">0 / 0</span>
+                </div>
+                <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden shadow-inner border border-white/5">
+                    <div id="mass-push-bar" class="h-full bg-gradient-to-r from-fuchsia-600 to-purple-500 transition-all duration-300 relative">
+                        <div class="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="enviarNotificacaoMassa()" id="btn-send-mass" class="w-full py-4 bg-gradient-to-r from-fuchsia-600 to-fuchsia-500 hover:from-fuchsia-500 hover:to-purple-500 text-white font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(192,38,211,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(192,38,211,0.6)] active:scale-[0.98] flex items-center justify-center gap-3 mt-4">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span id="mass-push-text">Disparar Alerta em Massa</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="section-config" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div class="bg-slate-900/40 rounded-[2.5rem] p-6 md:p-10 shadow-2xl border border-white/5 max-w-5xl mx-auto mt-4 md:mt-8 relative overflow-hidden backdrop-blur-xl">
+        
+        <div class="absolute -top-[30%] -right-[10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[100px] rounded-full mix-blend-screen pointer-events-none"></div>
+
+        <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-5 mb-10 relative z-10">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20 shadow-inner shrink-0">
+                 <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Motor de Crédito (Taxas)</h2>
+                <p class="text-xs md:text-sm text-slate-400 mt-1 font-medium">Configure os juros base mensais cobrados no Pix Parcelado por nível de conta.</p>
+            </div>
+        </div>
+
+        <div class="space-y-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+                
+                <div class="bg-slate-950/40 p-6 md:p-8 rounded-[2rem] border border-white/5 hover:bg-slate-800/40 hover:border-indigo-500/30 transition-all relative overflow-hidden group shadow-inner">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-300 border border-slate-700/50 shadow-sm">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-white uppercase tracking-widest">Standard</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Risco Moderado</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 relative z-10">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Taxa Decimal</label>
+                        <div class="relative">
+                            <input type="number" step="0.001" id="config-taxa-standard" placeholder="0.149" class="w-full bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-white font-black text-xl outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all pl-12 shadow-inner placeholder-slate-700">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 font-black text-lg">%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-950/40 p-6 md:p-8 rounded-[2rem] border border-white/5 hover:bg-slate-800/40 hover:border-yellow-500/30 transition-all relative overflow-hidden group shadow-inner">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-3xl group-hover:bg-yellow-500/10 transition-colors pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 border border-yellow-500/20 shadow-sm">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-yellow-400 uppercase tracking-widest">Gold</h3>
+                            <p class="text-[10px] text-yellow-500/60 font-bold uppercase tracking-wider mt-1">Risco Baixo</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 relative z-10">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Taxa Decimal</label>
+                        <div class="relative">
+                            <input type="number" step="0.001" id="config-taxa-gold" placeholder="0.099" class="w-full bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-yellow-400 font-black text-xl outline-none focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10 transition-all pl-12 shadow-inner placeholder-slate-700">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-yellow-500/50 font-black text-lg">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/40 p-6 md:p-8 rounded-[2rem] border border-white/5 hover:bg-slate-800/40 hover:border-sky-500/30 transition-all relative overflow-hidden group shadow-inner">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 rounded-full blur-3xl group-hover:bg-sky-500/10 transition-colors pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-500/20 shadow-sm">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-sky-400 uppercase tracking-widest">Platinum</h3>
+                            <p class="text-[10px] text-sky-500/60 font-bold uppercase tracking-wider mt-1">Risco Mínimo</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 relative z-10">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Taxa Decimal</label>
+                        <div class="relative">
+                            <input type="number" step="0.001" id="config-taxa-platinum" placeholder="0.069" class="w-full bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-sky-400 font-black text-xl outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all pl-12 shadow-inner placeholder-slate-700">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-sky-500/50 font-black text-lg">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-start gap-4 w-full md:w-1/2 bg-indigo-500/5 p-4 rounded-2xl border border-indigo-500/10">
+                    <div class="mt-0.5 text-indigo-400 shrink-0"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed font-medium">As taxas alteradas aqui são salvas no banco de dados da nuvem e refletem instantaneamente no motor de cálculo do aplicativo de todos os clientes.</p>
+                </div>
+                
+                <button onclick="salvarTaxas()" id="btn-save-taxas" class="w-full md:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(79,70,229,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(79,70,229,0.6)] active:scale-95 flex items-center justify-center gap-3 shrink-0">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <span id="text-save-taxas">Guardar Novas Taxas</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <!-- ---------------------------------------------------- -->
+                           <!-- Gestão de Banners      -->
+            <!-- ---------------------------------------------------- -->
+<div id="section-banners" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div class="max-w-6xl mx-auto mt-4 md:mt-8 space-y-6">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/40 p-6 md:p-8 rounded-[2.5rem] border border-white/5 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-[50%] -left-[10%] w-[40%] h-[150%] bg-indigo-600/10 blur-[80px] mix-blend-screen pointer-events-none"></div>
+            
+            <div class="flex items-center gap-4 relative z-10">
+                <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white flex items-center justify-center shadow-[0_4px_20px_-4px_rgba(99,102,241,0.5)] shrink-0">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Creative Studio</h2>
+                    <p class="text-[10px] md:text-xs text-slate-400 uppercase tracking-widest font-bold mt-1">Gestão de Banners do Aplicativo</p>
+                </div>
+            </div>
+            
+            <button onclick="salvarBanners()" id="btn-save-banners" class="px-6 py-4 md:py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(5,150,105,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(5,150,105,0.6)] active:scale-95 flex items-center justify-center gap-2 relative z-10 w-full md:w-auto">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg>
+                <span id="text-save-banners">Publicar Alterações</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-slate-900/40 p-6 md:p-8 rounded-[2.5rem] border border-white/5 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+                    <h3 class="text-xs font-black text-indigo-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.8)]"></span> Novo Destaque
+                    </h3>
+                    
+                    <div class="space-y-6 relative z-10">
+                        <div>
+                            <div class="flex justify-between items-center mb-2 px-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">URL da Imagem</label>
+                                <span class="text-[9px] font-black text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md">1280x560px</span>
+                            </div>
+                            <input type="text" id="novo-banner-img" oninput="atualizarPreviewBanner()" placeholder="https://imgur.com/foto.jpg" class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-sm outline-none focus:border-indigo-500 focus:bg-slate-900/80 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-600 shadow-inner">
+                        </div>
+
+                        <div id="banner-preview-container" class="hidden group relative">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">Live Preview</p>
+                            <div class="rounded-2xl overflow-hidden aspect-[16/7] border-2 border-indigo-500/30 bg-slate-950 shadow-[0_0_20px_rgba(99,102,241,0.15)] relative">
+                                <img id="banner-preview-img" src="" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                                    <span class="text-[9px] text-white font-black uppercase tracking-widest flex items-center gap-2">
+                                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        Visualização Mobile
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block px-1">Ação ao Clicar (Link)</label>
+                            <input type="text" id="novo-banner-link" placeholder="https://wa.me/suporte" class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-5 py-4 text-white text-sm outline-none focus:border-indigo-500 focus:bg-slate-900/80 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-600 shadow-inner">
+                        </div>
+
+                        <button onclick="adicionarBanner()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(79,70,229,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(79,70,229,0.6)] active:scale-[0.98] flex items-center justify-center gap-3">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+                            Adicionar Destaque
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-500/5 border border-indigo-500/10 p-5 rounded-3xl flex items-start gap-3 backdrop-blur-sm">
+                    <div class="mt-0.5 text-indigo-400 shrink-0"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                    <p class="text-[11px] text-indigo-200/60 leading-relaxed font-medium">
+                        <b class="text-indigo-300">Dica:</b> Banners com pouco texto e foco central funcionam melhor em dispositivos móveis. Use o formato .PNG ou .JPG para carregamento rápido.
+                    </p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                <div class="bg-slate-900/40 p-6 md:p-8 rounded-[2.5rem] border border-white/5 shadow-2xl backdrop-blur-xl h-full flex flex-col min-h-[400px]">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-xs font-black text-fuchsia-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M2 12h20M12 2v20M4.93 4.93l14.14 14.14M4.93 19.07L19.07 4.93"/></svg>
+                            Fila de Exibição Atual
+                        </h3>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 shadow-sm flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Ao Vivo no App
+                        </span>
+                    </div>
+
+                    <div id="lista-banners-render" class="grid grid-cols-1 md:grid-cols-2 gap-5 overflow-y-auto no-scrollbar pr-1">
+                        </div>
+
+                    <div id="banners-empty-state" class="hidden flex-1 flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-white/5 rounded-[2rem] bg-slate-950/20 mt-2">
+                        <div class="w-20 h-20 rounded-full bg-slate-900/80 flex items-center justify-center text-slate-600 mb-5 border border-white/5 shadow-inner">
+                            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </div>
+                        <p class="text-xs font-black text-slate-500 uppercase tracking-widest">Nenhum banner ativo</p>
+                        <p class="text-[11px] font-medium text-slate-600 mt-2">Adicione uma imagem no painel ao lado para começar.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+            <!-- ---------------------------------------------------- -->
+                           <!-- Taxas & Juros       -->
+            <!-- ---------------------------------------------------- -->
+    <div id="section-config" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div class="bg-slate-900/40 rounded-[2.5rem] p-6 md:p-10 shadow-2xl border border-white/5 max-w-5xl mx-auto mt-4 md:mt-8 relative overflow-hidden backdrop-blur-xl">
+        
+        <div class="absolute -top-[30%] -right-[10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[100px] rounded-full mix-blend-screen pointer-events-none"></div>
+
+        <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-5 mb-10 relative z-10">
+            <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20 shadow-inner shrink-0">
+                 <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">Motor de Crédito (Taxas)</h2>
+                <p class="text-xs md:text-sm text-slate-400 mt-1 font-medium">Configure os juros base mensais cobrados no Pix Parcelado por nível de conta.</p>
+            </div>
+        </div>
+
+        <div class="space-y-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+                
+                <div class="bg-slate-950/40 p-6 md:p-8 rounded-[2rem] border border-white/5 hover:bg-slate-800/40 hover:border-indigo-500/30 transition-all relative overflow-hidden group shadow-inner">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-300 border border-slate-700/50 shadow-sm">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-white uppercase tracking-widest">Standard</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Risco Moderado</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 relative z-10">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Taxa Decimal</label>
+                        <div class="relative">
+                            <input type="number" step="0.001" id="config-taxa-standard" placeholder="0.149" class="w-full bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-white font-black text-xl outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all pl-12 shadow-inner placeholder-slate-700">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 font-black text-lg">%</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 ml-2 mt-2 font-medium">Ex: 0.149 = 14,9% a.m.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-950/40 p-6 md:p-8 rounded-[2rem] border border-white/5 hover:bg-slate-800/40 hover:border-yellow-500/30 transition-all relative overflow-hidden group shadow-inner">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-3xl group-hover:bg-yellow-500/10 transition-colors pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 border border-yellow-500/20 shadow-sm">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-yellow-400 uppercase tracking-widest">Gold</h3>
+                            <p class="text-[10px] text-yellow-500/60 font-bold uppercase tracking-wider mt-1">Risco Controlado</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 relative z-10">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Taxa Decimal</label>
+                        <div class="relative">
+                            <input type="number" step="0.001" id="config-taxa-gold" placeholder="0.099" class="w-full bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-yellow-400 font-black text-xl outline-none focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10 transition-all pl-12 shadow-inner placeholder-slate-700">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-yellow-500/50 font-black text-lg">%</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 ml-2 mt-2 font-medium">Ex: 0.099 = 9,9% a.m.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/40 p-6 md:p-8 rounded-[2rem] border border-white/5 hover:bg-slate-800/40 hover:border-sky-500/30 transition-all relative overflow-hidden group shadow-inner">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 rounded-full blur-3xl group-hover:bg-sky-500/10 transition-colors pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center text-sky-400 border border-sky-500/20 shadow-sm">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-sky-400 uppercase tracking-widest">Platinum</h3>
+                            <p class="text-[10px] text-sky-500/60 font-bold uppercase tracking-wider mt-1">Baixíssimo Risco</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 relative z-10">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2 ml-1">Taxa Decimal</label>
+                        <div class="relative">
+                            <input type="number" step="0.001" id="config-taxa-platinum" placeholder="0.069" class="w-full bg-slate-900/80 border border-white/5 rounded-2xl px-5 py-4 text-sky-400 font-black text-xl outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all pl-12 shadow-inner placeholder-slate-700">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-sky-500/50 font-black text-lg">%</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 ml-2 mt-2 font-medium">Ex: 0.069 = 6,9% a.m.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-start gap-4 w-full md:w-1/2 bg-indigo-500/5 p-4 rounded-2xl border border-indigo-500/10">
+                    <div class="mt-0.5 text-indigo-400 shrink-0"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed font-medium">As alterações aplicam-se imediatamente a novas simulações e envios de Pix no aplicativo do cliente. Transações já realizadas não serão afetadas.</p>
+                </div>
+                
+                <button onclick="salvarTaxas()" id="btn-save-taxas" class="w-full md:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(79,70,229,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(79,70,229,0.6)] active:scale-95 flex items-center justify-center gap-3 shrink-0">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <span id="text-save-taxas">Guardar Novas Taxas</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- ============================================================================== -->
+    <!-- 4. MODAL GIGANTE (RAIO-X COMPLETO DO CLIENTE)                                  -->
+    <!-- ============================================================================== -->
+    
+    <div id="modal-overlay" 
+     onclick="fecharDetalhes()" 
+     class="fixed inset-0 bg-[#020617]/90 backdrop-blur-md z-[90] hidden opacity-0 transition-opacity duration-300">
+</div>
+
+<div id="client-modal" 
+class="fixed inset-0 md:inset-6 lg:left-[300px] lg:right-8 lg:inset-y-10 bg-slate-900 border-0 md:border border-white/10 rounded-none md:rounded-[2.5rem] z-[100] flex flex-col shadow-[0_0_80px_rgba(0,0,0,0.6)] transition-all duration-300 transform scale-95 opacity-0 hidden overflow-hidden">
+    <div class="p-6 border-b border-white/5 flex justify-between items-center bg-slate-900/80 backdrop-blur-xl z-20 shrink-0 sticky top-0">
+        <div class="flex items-center gap-4 overflow-hidden">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0 shadow-inner">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4-4v2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <h3 class="text-2xl font-black text-white tracking-tight truncate" id="modal-title">Nome do Cliente</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-slate-400 truncate mt-1" id="modal-email-cpf">email@cliente.com | 000.000.000-00</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3 shrink-0">
+            <button onclick="verDadosRaw()" class="w-12 h-12 rounded-2xl bg-slate-800/60 flex items-center justify-center text-indigo-400 hover:text-indigo-300 transition-all border border-white/5 hover:bg-indigo-500/10 hover:scale-105 active:scale-95" title="Ver Ficha Bruta">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <polyline points="14 2 14 8 20 8" stroke-linejoin="round"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13" stroke-linecap="round"></line>
+                    <line x1="16" y1="17" x2="8" y2="17" stroke-linecap="round"></line>
+                </svg>
+            </button>
+            
+            <button onclick="fecharDetalhes()" class="w-12 h-12 rounded-2xl bg-slate-800/60 flex items-center justify-center text-slate-400 hover:text-white transition-all border border-white/5 hover:bg-red-500/20 hover:text-red-400 active:scale-95">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 md:p-10 no-scrollbar relative z-10">
+        <input type="hidden" id="edit-uid">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <div class="space-y-8">
+                <section>
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-4 flex items-center gap-2">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 
+                        Perfil de Acesso
+                    </h4>
+                    <div class="bg-slate-950/40 p-6 rounded-[2.5rem] border border-white/5 space-y-5 shadow-inner">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block ml-1">Status da Conta</label>
+                            <select id="edit-status" class="w-full bg-slate-900 border border-white/10 rounded-2xl px-4 py-4 text-white font-semibold text-sm focus:border-indigo-500 transition-all outline-none appearance-none cursor-pointer">
+                                <option value="pendente">🟠 Pendente (Análise)</option>
+                                <option value="ativo">🟢 Ativa (Liberado)</option>
+                                <option value="bloqueado">🔴 Bloqueada (Suspenso)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block ml-1">Nome Completo</label>
+                            <input type="text" id="edit-nome" class="w-full bg-slate-900 border border-white/10 rounded-2xl px-4 py-4 text-white text-sm focus:border-indigo-500 transition-all outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block ml-1">Nível / Tier</label>
+                            <select id="edit-tier" class="w-full bg-slate-900 border border-white/10 rounded-2xl px-4 py-4 text-white font-semibold text-sm focus:border-indigo-500 transition-all outline-none appearance-none">
+                                <option value="Standard">Standard</option>
+                                <option value="Gold">Gold</option>
+                                <option value="Platinum">Platinum</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-fuchsia-400 mb-4 flex items-center gap-2">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"></path></svg> 
+                        Notificação Push Direta
+                    </h4>
+                    <div class="bg-fuchsia-500/5 p-6 rounded-[2.5rem] border border-fuchsia-500/10 space-y-4">
+                        <input type="text" id="push-titulo" placeholder="Título do Alerta" class="w-full bg-slate-950/60 border border-white/5 rounded-2xl px-4 py-3.5 text-white text-sm outline-none focus:border-fuchsia-500 transition-all placeholder-slate-600">
+                        <textarea id="push-mensagem" placeholder="Mensagem para o app..." rows="2" class="w-full bg-slate-950/60 border border-white/5 rounded-2xl px-4 py-3.5 text-white text-sm outline-none focus:border-fuchsia-500 transition-all placeholder-slate-600 resize-none"></textarea>
+                        
+                        <select id="push-tipo" class="w-full bg-slate-950/60 border border-white/5 rounded-2xl px-4 py-3 text-white text-xs font-bold uppercase tracking-widest outline-none appearance-none">
+                            <option value="info">ℹ️ Informativo</option>
+                            <option value="sucesso">✅ Sucesso (Verde)</option>
+                            <option value="acesso_suspeito">🚨 Alerta Crítico</option>
+                            <option value="pix_enviado">💸 Pix Enviado</option>
+                        </select>
+
+                        <button onclick="enviarNotificacaoPush()" id="btn-send-push" class="w-full py-4 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-600/20">
+                            <svg id="push-spinner" class="animate-spin hidden" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"></path></svg>
+                            <span id="push-text">Disparar Alerta</span>
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="space-y-8">
+                <section>
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-4 flex items-center gap-2">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> 
+                        Financeiro & Limites
+                    </h4>
+                    <div class="bg-slate-950/40 p-6 rounded-[2.5rem] border border-white/5 space-y-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block text-center">Saldo em Conta</label>
+                            <input type="number" step="0.01" id="edit-saldo" class="w-full bg-emerald-500/5 border border-emerald-500/20 rounded-3xl px-4 py-5 text-emerald-400 font-black text-3xl text-center outline-none focus:border-emerald-500 transition-all shadow-inner">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-900/50 p-4 rounded-3xl border border-white/5">
+                                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 block text-center">Limite Pix</label>
+                                <input type="number" step="0.01" id="edit-limite-pix" class="w-full bg-transparent text-white font-bold text-lg text-center outline-none">
+                            </div>
+                            <div class="bg-slate-900/50 p-4 rounded-3xl border border-white/5">
+                                <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 block text-center">Limite Cartão</label>
+                                <input type="number" step="0.01" id="edit-limite-compras" class="w-full bg-transparent text-white font-bold text-lg text-center outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-orange-400 mb-4 flex items-center gap-2">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h10"/></svg> 
+                        Fatura Aura
+                    </h4>
+                    <div class="bg-slate-950/40 p-6 rounded-[2.5rem] border border-white/5 space-y-5">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block ml-1">Valor Atual</label>
+                                <input type="number" step="0.01" id="edit-fatura-valor" class="w-full bg-slate-900 border border-white/10 rounded-2xl px-4 py-3.5 text-white font-bold text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block ml-1">Vencimento</label>
+                                <input type="text" id="edit-fatura-vencimento" placeholder="Ex: 10/03" class="w-full bg-slate-900 border border-white/10 rounded-2xl px-4 py-3.5 text-white font-bold text-sm outline-none">
+                            </div>
+                        </div>
+                        <select id="edit-fatura-status" class="w-full bg-slate-900 border border-white/10 rounded-2xl px-4 py-4 text-white font-semibold text-sm outline-none appearance-none">
+                            <option value="Aberta">🔵 Fatura Aberta</option>
+                            <option value="Fechada">🟠 Fatura Fechada</option>
+                            <option value="Atrasada">🔴 Fatura em Atraso</option>
+                            <option value="Paga">🟢 Fatura Paga</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section class="bg-red-500/5 p-6 rounded-[2.5rem] border border-red-500/10 text-center">
+                    <label class="text-[10px] font-black text-red-400 uppercase tracking-[0.2em] mb-4 block">Score de Risco Interno</label>
+                    <div class="flex items-center justify-center gap-4">
+                        <input type="number" id="edit-score" class="w-24 bg-slate-950 border border-red-500/20 rounded-2xl py-4 text-white font-black text-4xl text-center outline-none focus:border-red-500 transition-all">
+                        <div class="text-left border-l border-white/10 pl-4 space-y-1">
+                            <p class="text-[9px] font-bold text-emerald-400 uppercase tracking-tighter">> 85: EXCELENTE</p>
+                            <p class="text-[9px] font-bold text-orange-400 uppercase tracking-tighter">< 45: ATENÇÃO</p>
+                            <p class="text-[9px] font-bold text-red-400 uppercase tracking-tighter">< 30: RISCO ALTO</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="lg:h-full flex flex-col">
+                <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2 px-1">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg> 
+                    Fluxo de Transações
+                </h4>
+                <div id="extrato-container" 
+                     class="bg-slate-950/60 p-4 rounded-[2.5rem] border border-white/5 flex-1 overflow-y-auto max-h-[500px] lg:max-h-full space-y-3 no-scrollbar shadow-inner">
+                    <p class="text-[10px] text-slate-600 font-bold uppercase tracking-widest text-center py-20">Nenhuma transação registrada</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="p-6 border-t border-white/5 bg-slate-900/90 backdrop-blur-2xl flex flex-col-reverse md:flex-row justify-end gap-4 shrink-0 z-20">
+        <button onclick="fecharDetalhes()" class="px-10 py-5 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white bg-slate-800/40 border border-white/5 transition-all active:scale-95">
+            Descartar
+        </button>
+        
+        <button onclick="salvarAlteracoes()" id="btn-salvar" class="px-12 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95 flex items-center justify-center gap-3">
+            <svg id="save-spinner" class="animate-spin hidden" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"></path>
+            </svg>
+            <span id="save-text">Atualizar Dados</span>
+        </button>
+    </div>
+</div>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Classe para disparar via JS */
+    .modal-active {
+        display: flex !important;
+        opacity: 1 !important;
+        transform: scale(1) !important;
+    }
+    .overlay-active {
+        display: block !important;
+        opacity: 1 !important;
+    }
+</style>
+
+    <!-- ============================================================================== -->
+    <!-- MODAL DE FICHA CADASTRAL (SUBSTITUIU A VISÃO JSON RAW)                         -->
+    <!-- ============================================================================== -->
+    <div id="raw-modal-overlay" onclick="fecharDadosRaw()" class="fixed inset-0 bg-[#020617]/80 backdrop-blur-md z-[60] hidden opacity-0 transition-opacity duration-300 flex items-center justify-center p-3 md:p-6">
+        
+        <div id="raw-modal" onclick="event.stopPropagation()" class="bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-[2rem] md:rounded-[2.5rem] w-full max-w-4xl max-h-[90vh] md:max-h-[85vh] flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-300 transform scale-95 opacity-0 relative overflow-hidden">
+            
+            <div class="absolute -top-32 -right-32 w-64 h-64 bg-indigo-600/10 rounded-full blur-[80px] pointer-events-none"></div>
+
+            <div class="p-4 md:p-6 border-b border-white/5 flex justify-between items-center bg-slate-900/50 z-10 shrink-0">
+                <h3 class="text-[11px] md:text-xs font-black text-indigo-400 uppercase tracking-widest flex items-center gap-3">
+                    <div class="w-10 h-10 md:w-12 md:h-12 rounded-[1rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-inner shrink-0">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <polyline points="14 2 14 8 20 8" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13" stroke-linecap="round"></line>
+                            <line x1="16" y1="17" x2="8" y2="17" stroke-linecap="round"></line>
+                            <polyline points="10 9 9 9 8 9" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                        </svg>
+                    </div>
+                    Ficha Bruta
+                </h3>
+                
+                <div class="flex items-center gap-2 md:gap-3">
+                    <button onclick="copiarJSON()" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/30 hover:border-indigo-500 text-[10px] font-bold uppercase tracking-widest px-4 md:px-5 py-3 md:py-3.5 rounded-xl transition-all flex items-center gap-2 active:scale-95 shadow-inner" title="Copiar código JSON para área de transferência">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span class="hidden sm:inline">Copiar JSON</span>
+                        <span class="sm:hidden">Copiar</span>
+                    </button>
+                    
+                    <button onclick="fecharDadosRaw()" class="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-slate-800/40 flex items-center justify-center text-slate-400 hover:text-white transition-all border border-white/5 hover:bg-slate-700/50 hover:scale-105 active:scale-95 shrink-0">
+                        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-5 md:p-8 overflow-y-auto no-scrollbar flex-1 relative bg-slate-950/40 z-10" id="ficha-completa-content">
+                </div>
+
+            <pre id="raw-json-content" class="hidden"></pre>
+        </div>
+    </div>
+
+
+    <!-- ============================================================================== -->
+    <!-- TOAST (NOTIFICAÇÕES FLUTUANTES NO ECRÃ)                                        -->
+    <!-- ============================================================================== -->
+    <div id="toast-container" class="fixed bottom-[max(env(safe-area-inset-bottom,1.5rem),1.5rem)] left-1/2 transform -translate-x-1/2 flex flex-col gap-2 z-[200] pointer-events-none w-[90%] md:w-auto max-w-sm">
+        <!-- Notificações aparecem aqui via JS -->
+    </div>
+
+
+    <!-- ============================================================================== -->
+    <!-- JAVASCRIPT COMPLETO E BEM IDENTADO (LÓGICA ORIGINAL MANTIDA)                   -->
+    <!-- ============================================================================== -->
+    <script>
+        // Configuração da API do Servidor (Mudar em Produção)
+        const API_URL = 'http://72.61.222.214:3001/api/admin';
+        let adminToken = '';
+
+        // Variáveis Globais de Estado
+        let adminLogado = false;
+        let usuariosCadastrados = []; 
+        let usuariosFiltrados = [];
+        let filtroAtual = 'todos';
+        let sortConfig = { key: 'createdAt', direction: 'desc' };
+        
+        // Paginação
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // Formatação Visual de Moeda (Real Brasileiro)
+        const formatarMoeda = (valor) => {
+            return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+
+// ============================================================================
+        // CONTROLE DA BARRA LATERAL (MOBILE) COM ANIMAÇÕES PREMIUM E SCROLL LOCK
+        // ============================================================================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            
+            if (isClosed) {
+                // 1. Mostrar o overlay suavemente
+                overlay.classList.remove('hidden');
+                // Um pequeno truque (timeout de 10ms) para o navegador registrar que o 'hidden' saiu 
+                // antes de aplicar a opacidade, garantindo que a transição seja animada.
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('opacity-100');
+                }, 10);
+                
+                // 2. Deslizar a Sidebar para dentro da tela
+                sidebar.classList.remove('-translate-x-full');
+                
+                // 3. Travar o scroll da página principal (UX de App Nativo)
+                if (window.innerWidth < 768) { // Apenas trava no mobile (md break point do Tailwind)
+                    document.body.classList.add('overflow-hidden');
+                }
+                
+            } else {
+                // 1. Deslizar a Sidebar de volta para fora
+                sidebar.classList.add('-translate-x-full');
+                
+                // 2. Iniciar o fade-out do overlay escuro
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('opacity-0');
+                
+                // 3. Esconder o overlay completamente APÓS a animação (300ms) e liberar o scroll
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                }, 300);
+            }
+        }
+
+        // ============================================================================
+        // SISTEMA DE NOTIFICAÇÕES (TOAST PREMIUM GLASSMORPHISM)
+        // ============================================================================
+        function mostrarToast(mensagem, tipo = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            // Definição de Cores e Ícones baseados no tipo de alerta
+            let bgIcon = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]";
+            let iconSvg = `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="22 4 12 14.01 9 11.01" stroke-linecap="round" stroke-linejoin="round"></polyline>`;
+            
+            if (tipo === 'error') {
+                bgIcon = "bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]";
+                iconSvg = `<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"></line><line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"></line>`;
+            } else if (tipo === 'info') {
+                bgIcon = "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-[0_0_10px_rgba(99,102,241,0.2)]";
+                iconSvg = `<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12" stroke-linecap="round"></line><line x1="12" y1="8" x2="12.01" y2="8" stroke-linecap="round"></line>`;
+            }
+
+            // Estrutura Visual do Toast com Animação de Entrada
+            toast.className = `bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] p-4 flex items-center gap-4 animate-in slide-in-from-top-10 fade-in duration-300 pointer-events-auto w-full relative overflow-hidden`;
+            
+            toast.innerHTML = `
+                <div class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"></div>
+                
+                <div class="w-10 h-10 rounded-[0.8rem] flex items-center justify-center border ${bgIcon} shrink-0 bg-slate-950/50">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">${iconSvg}</svg>
+                </div>
+                
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-black text-white tracking-wide uppercase truncate mt-0.5">${tipo === 'success' ? 'Sucesso' : tipo === 'error' ? 'Atenção' : 'Aviso'}</p>
+                    <p class="text-[11px] font-medium text-slate-300 truncate">${mensagem}</p>
+                </div>
+                
+                <button onclick="this.parentElement.remove()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-colors shrink-0">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Remove o Toast automaticamente após 4 segundos (com animação de saída suave)
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.replace('animate-in', 'animate-out');
+                    toast.classList.replace('slide-in-from-top-10', 'slide-out-to-top-10');
+                    toast.classList.replace('fade-in', 'fade-out');
+                    setTimeout(() => toast.remove(), 300); // Tempo para a animação terminar
+                }
+            }, 4000);
+        }
+
+        // ============================================================================
+        // FUNÇÕES DE LOGIN E AUTENTICAÇÃO (UX PREMIUM & MOBILE FIRST)
+        // ============================================================================
+        async function fazerLogin() {
+            const inputElement = document.getElementById('admin-password');
+            const pwd = inputElement.value;
+            const errorMsg = document.getElementById('login-error');
+            const btnLogin = document.querySelector('button[onclick="fazerLogin()"]');
+
+            // UX Mobile: Recolhe o teclado virtual imediatamente após o clique ou Enter
+            inputElement.blur();
+
+            // Esconde a mensagem de erro antiga (se existir)
+            errorMsg.classList.add('hidden');
+
+            // Feedback visual Premium no botão (Guarda o conteúdo original para restaurar depois)
+            const conteudoOriginalBtn = btnLogin.innerHTML;
+            btnLogin.disabled = true;
+            btnLogin.classList.add('opacity-80', 'cursor-wait');
+            btnLogin.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                VERIFICANDO...
+            `;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ senha: pwd })
+                });
+                
+                const data = await response.json();
+
+                if (data.success) {
+                    adminLogado = true;
+                    adminToken = data.token;
+
+                    // Efeito de transição suave de profundidade ao sair
+                    const loginScreen = document.getElementById('login-screen');
+                    loginScreen.style.transform = 'scale(1.05)';
+                    loginScreen.classList.add('opacity-0', 'pointer-events-none');
+                    
+                    setTimeout(() => {
+                        loginScreen.classList.add('hidden');
+                        mostrarToast('Bem-vindo ao Aura Admin!', 'success');
+                        carregarUsuarios(); // Inicia o carregamento dos clientes
+                    }, 500);
+                    
+                } else {
+                    // Reprova o acesso: Mostra o erro e limpa a password
+                    errorMsg.classList.remove('hidden');
+                    inputElement.value = '';
+                    
+                    mostrarToast('Chave de segurança inválida.', 'error');
+                    
+                    // Restaura o botão ao estado normal
+                    btnLogin.innerHTML = conteudoOriginalBtn;
+                    btnLogin.disabled = false;
+                    btnLogin.classList.remove('opacity-80', 'cursor-wait');
+                }
+            } catch (error) {
+                mostrarToast('Erro ao ligar ao servidor da VPS.', 'error');
+                
+                // Restaura o botão ao estado normal em caso de falha de internet
+                btnLogin.innerHTML = conteudoOriginalBtn;
+                btnLogin.disabled = false;
+                btnLogin.classList.remove('opacity-80', 'cursor-wait');
+            }
+        }
+
+        // ============================================================================
+        // SISTEMA DE SEGURANÇA: LOGOUT (TRANCAR PAINEL)
+        // ============================================================================
+        function fazerLogout() {
+            // 1. Apaga as credenciais da memória
+            adminLogado = false;
+            adminToken = '';
+            
+            // 2. Limpa todos os dados sensíveis da interface
+            usuariosCadastrados = [];
+            usuariosFiltrados = [];
+            document.getElementById('tabela-usuarios').innerHTML = '';
+            document.getElementById('metric-users').innerText = '0';
+            document.getElementById('metric-pendentes').innerText = '0';
+            document.getElementById('metric-saldo').innerText = 'R$ 0,00';
+            document.getElementById('metric-limite').innerText = 'R$ 0,00';
+            
+            // 3. Fecha a barra lateral no mobile (Apenas se estiver aberta)
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+            
+            // 4. Prepara o ecrã de login para voltar
+            const loginScreen = document.getElementById('login-screen');
+            const passwordInput = document.getElementById('admin-password');
+            
+            passwordInput.value = ''; // Limpa a password
+            document.getElementById('login-error').classList.add('hidden');
+            
+            // Remove o display:none
+            loginScreen.classList.remove('hidden');
+            
+            // Delay de 50ms para permitir que o navegador renderize o elemento antes de animar
+            setTimeout(() => {
+                // Remove a transparência e devolve a escala normal (reverte o zoom do login)
+                loginScreen.classList.remove('opacity-0', 'pointer-events-none');
+                loginScreen.style.transform = 'scale(1)'; 
+            }, 50);
+            
+            // 5. Feedback visual de segurança
+            mostrarToast('Sessão encerrada de forma segura.', 'success');
+        }
+       // ------------------------------------------------------------------
+        // UTILITÁRIOS: CÓPIA E EXPORTAÇÃO (CSV) E JSON (OTIMIZADO MOBILE)
+        // ------------------------------------------------------------------
+        
+        // Função moderna e segura para copiar texto no Mobile e Desktop
+        async function copiarCPF(cpf) {
+            try {
+                // Tenta usar a API moderna do Clipboard (padrão atual do iOS e Android)
+                await navigator.clipboard.writeText(cpf);
+                mostrarToast(`CPF ${cpf} copiado com sucesso!`, 'success');
+            } catch (err) {
+                // Fallback de segurança para navegadores muito antigos
+                const tempInput = document.createElement("input");
+                tempInput.value = cpf;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+                mostrarToast(`CPF ${cpf} copiado!`, 'success');
+            }
+        }
+
+        function verDadosRaw() {
+            const uid = document.getElementById('edit-uid').value;
+            const user = usuariosCadastrados.find(u => u.uid === uid);
+            if (!user) { mostrarToast('Utilizador não encontrado na memória.', 'error'); return; }
+            
+            // Guarda o JSON oculto apenas para o botão "Copiar JSON"
+            document.getElementById('raw-json-content').innerText = JSON.stringify(user, null, 4);
+            
+            const container = document.getElementById('ficha-completa-content');
+            
+            // Função auxiliar para desenhar cartões de informação de forma Premium (Glassmorphism)
+            const campo = (label, valor, isMoeda = false) => {
+                let valorFinal = valor;
+                if (valorFinal === undefined || valorFinal === null || valorFinal === '') {
+                    valorFinal = '<span class="text-slate-600 italic font-medium">Não informado</span>';
+                } else if (isMoeda && !isNaN(valorFinal)) {
+                    valorFinal = formatarMoeda(valorFinal);
+                }
+                
+                return `
+                    <div class="bg-slate-900/40 p-4 md:p-5 rounded-2xl border border-white/5 hover:bg-slate-800/40 transition-all shadow-inner group">
+                        <p class="text-[9px] md:text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1.5 group-hover:text-indigo-400 transition-colors">${label}</p>
+                        <p class="text-sm md:text-base text-white font-semibold break-words">${valorFinal}</p>
+                    </div>
+                `;
+            };
+
+            // Trata a formatação da data de criação da conta de forma segura
+            let dataCriacao = 'Desconhecida';
+            if (user.createdAt && user.createdAt._seconds) {
+                dataCriacao = new Date(user.createdAt._seconds * 1000).toLocaleString('pt-BR');
+            } else if (user.createdAt) {
+                dataCriacao = new Date(user.createdAt).toLocaleString('pt-BR');
+            }
+
+            // Injeta o HTML com as secções organizadas e design Premium
+            container.innerHTML = `
+                <div class="space-y-8 md:space-y-10 pb-6">
+                    <section>
+                        <h4 class="text-[10px] md:text-xs font-black text-indigo-400 uppercase tracking-[0.2em] mb-4 md:mb-5 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-inner shrink-0">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </div>
+                            Informações Pessoais
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${campo('Nome Completo', user.nome)}
+                            ${campo('CPF', user.cpf)}
+                            ${campo('Data de Nascimento', user.dataNascimento)}
+                            ${campo('Nome da Mãe', user.nomeMae)}
+                            ${campo('Estado Civil', user.estadoCivil)}
+                            ${campo('Nacionalidade', user.nacionalidade)}
+                        </div>
+                    </section>
+
+                    <hr class="border-white/5">
+
+                    <section>
+                        <h4 class="text-[10px] md:text-xs font-black text-emerald-400 uppercase tracking-[0.2em] mb-4 md:mb-5 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-inner shrink-0">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            </div>
+                            Contato e Acesso
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${campo('E-mail', user.email)}
+                            ${campo('Celular', user.celular)}
+                            ${campo('UID (Firebase)', user.uid)}
+                            ${campo('ID Asaas (Cliente)', user.asaasId || '<span class="text-orange-400 font-bold">Não sincronizado</span>')}
+                            ${campo('Membro Desde', dataCriacao)}
+                            ${campo('Score Aura', user.score)}
+                        </div>
+                    </section>
+
+                    <hr class="border-white/5">
+
+                    <section>
+                        <h4 class="text-[10px] md:text-xs font-black text-orange-400 uppercase tracking-[0.2em] mb-4 md:mb-5 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shadow-inner shrink-0">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            </div>
+                            Endereço Residencial
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${campo('CEP', user.cep)}
+                            ${campo('Endereço', user.endereco)}
+                            ${campo('Número', user.numero)}
+                            ${campo('Bairro', user.bairro)}
+                            ${campo('Cidade', user.cidade)}
+                            ${campo('Estado (UF)', user.uf)}
+                        </div>
+                    </section>
+
+                    <hr class="border-white/5">
+
+                    <section>
+                        <h4 class="text-[10px] md:text-xs font-black text-fuchsia-400 uppercase tracking-[0.2em] mb-4 md:mb-5 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-fuchsia-500/10 flex items-center justify-center border border-fuchsia-500/20 shadow-inner shrink-0">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                            </div>
+                            Perfil Socioeconômico
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${campo('Profissão', user.profissao)}
+                            ${campo('Renda Mensal', user.renda, true)}
+                            ${campo('Patrimônio Estimado', user.patrimonio)}
+                            ${campo('Aceitou Termos', user.aceiteTermos ? '<span class="text-emerald-400 font-bold">Sim ✅</span>' : '<span class="text-red-400 font-bold">Não ❌</span>')}
+                        </div>
+                    </section>
+                </div>
+            `;
+
+            const overlay = document.getElementById('raw-modal-overlay');
+            const modal = document.getElementById('raw-modal');
+            
+            // Trava o scroll do fundo no mobile ao abrir o modal
+            if (window.innerWidth < 768) document.body.classList.add('overflow-hidden');
+            
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                modal.classList.remove('opacity-0', 'scale-95');
+            }, 10);
+        }
+
+        function fecharDadosRaw() {
+            const overlay = document.getElementById('raw-modal-overlay');
+            const modal = document.getElementById('raw-modal');
+            
+            overlay.classList.add('opacity-0');
+            modal.classList.add('opacity-0', 'scale-95');
+            
+            setTimeout(() => { 
+                overlay.classList.add('hidden'); 
+                // Libera o scroll do fundo ao fechar
+                document.body.classList.remove('overflow-hidden');
+            }, 300);
+        }
+
+        async function copiarJSON() {
+            const jsonText = document.getElementById('raw-json-content').innerText;
+            try {
+                // API Moderna para copiar (Funciona perfeitamente no iOS/Android)
+                await navigator.clipboard.writeText(jsonText);
+                mostrarToast('JSON copiado com sucesso para a área de transferência!', 'success');
+            } catch (err) {
+                // Fallback seguro caso a API moderna falhe
+                const tempInput = document.createElement("textarea");
+                tempInput.value = jsonText;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+                mostrarToast('JSON copiado com sucesso!', 'success');
+            }
+        }
+
+        function exportarCSV() {
+            if (usuariosFiltrados.length === 0) {
+                mostrarToast('Nenhum dado disponível para exportar no momento.', 'error');
+                return;
+            }
+
+            mostrarToast('A preparar o ficheiro CSV...', 'info');
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome,Email,CPF,Status,Tier,Saldo,Limite Pix,Limite Compras\r\n";
+
+            usuariosFiltrados.forEach(user => {
+                const status = user.status || (!user.limites?.pix && !user.limites?.compras ? 'pendente' : 'ativo');
+                
+                const row = [
+                    `"${user.nome || ''}"`,
+                    `"${user.email || ''}"`,
+                    `"${user.cpf || ''}"`,
+                    `"${status}"`,
+                    `"${user.tier || 'Standard'}"`,
+                    user.saldo || 0,
+                    user.limites?.pix || 0,
+                    user.limites?.compras || 0
+                ].join(",");
+                
+                csvContent += row + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `AuraPix_Clientes_${filtroAtual}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            setTimeout(() => {
+                mostrarToast('Download do CSV iniciado com sucesso!', 'success');
+            }, 500);
+        }
+
+        // ------------------------------------------------------------------
+        // 🚀 DISPARAR NOTIFICAÇÃO PUSH INDIVIDUAL (OTIMIZADO MOBILE)
+        // ------------------------------------------------------------------
+        async function enviarNotificacaoPush() {
+            // Mobile UX: Recolhe o teclado virtual imediatamente ao clicar no botão
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+
+            const uid = document.getElementById('edit-uid').value;
+            const titulo = document.getElementById('push-titulo').value.trim();
+            const mensagem = document.getElementById('push-mensagem').value.trim();
+            const tipo = document.getElementById('push-tipo').value;
+
+            // Validação visual rápida
+            if (!titulo || !mensagem) {
+                mostrarToast('Por favor, preencha o título e a mensagem do alerta.', 'error');
+                return;
+            }
+
+            const confirmacao = confirm(`Deseja realmente disparar este alerta Push diretamente para o telemóvel do cliente?`);
+            if (!confirmacao) return;
+
+            const btn = document.getElementById('btn-send-push');
+            const spinner = document.getElementById('push-spinner');
+            const btnText = document.getElementById('push-text');
+
+            // Feedback Visual de Carregamento Premium
+            btn.disabled = true;
+            btn.classList.add('opacity-80', 'cursor-wait');
+            spinner.classList.remove('hidden');
+            btnText.innerText = 'A enviar Alerta...';
+
+            try {
+                const response = await fetch(`${API_URL}/notificar`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'x-admin-key': adminToken 
+                    },
+                    body: JSON.stringify({ uid, titulo, mensagem, tipo })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarToast('Aviso Push enviado com sucesso!', 'success');
+                    
+                    // Limpa o formulário perfeitamente para o próximo uso
+                    document.getElementById('push-titulo').value = '';
+                    document.getElementById('push-mensagem').value = '';
+                    document.getElementById('push-tipo').value = 'info'; 
+                } else {
+                    mostrarToast(data.error || 'Falha ao enviar o push.', 'error');
+                }
+            } catch (error) {
+                mostrarToast('Erro de ligação com o servidor remoto.', 'error');
+            } finally {
+                // Restaura o estado nativo do botão
+                btn.disabled = false;
+                btn.classList.remove('opacity-80', 'cursor-wait');
+                spinner.classList.add('hidden');
+                btnText.innerText = 'Enviar Alerta Direto';
+            }
+        }
+
+       // ------------------------------------------------------------------
+        // 🚀 TRANSMISSÃO GLOBAL (MASS PUSH) - UX PREMIUM E MOBILE OTIMIZADO
+        // ------------------------------------------------------------------
+        async function enviarNotificacaoMassa() {
+            // Mobile UX: Recolhe o teclado virtual imediatamente
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+
+            if (!usuariosCadastrados || usuariosCadastrados.length === 0) {
+                mostrarToast('Não existem clientes na memória para notificar.', 'error');
+                return;
+            }
+
+            const tituloInput = document.getElementById('mass-push-titulo');
+            const mensagemInput = document.getElementById('mass-push-mensagem');
+            const tipoInput = document.getElementById('mass-push-tipo');
+
+            const titulo = tituloInput.value.trim();
+            const mensagem = mensagemInput.value.trim();
+            const tipo = tipoInput.value;
+
+            if (!titulo || !mensagem) {
+                mostrarToast('Preencha o título e a mensagem antes de disparar o alerta.', 'error');
+                return;
+            }
+
+            const total = usuariosCadastrados.length;
+            const confirmacao = confirm(`🚨 ATENÇÃO: Tem a certeza que deseja enviar este alerta para TODOS os ${total} clientes simultaneamente?`);
+            if (!confirmacao) return;
+
+            // Elementos de UI
+            const btn = document.getElementById('btn-send-mass');
+            const progressContainer = document.getElementById('mass-push-progress-container');
+            const progressText = document.getElementById('mass-push-status-text');
+            const progressCount = document.getElementById('mass-push-count');
+            const progressBar = document.getElementById('mass-push-bar');
+
+            // Feedback Visual: Guarda o visual original do botão e coloca-o em estado de carregamento
+            const conteudoOriginalBtn = btn.innerHTML;
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-wait');
+            btn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>A TRANSMITIR...</span>
+            `;
+            
+            progressContainer.classList.remove('hidden');
+            
+            let sucessoCount = 0;
+            let falhaCount = 0;
+
+            // Loop de envio individual para cada cliente
+            for (let i = 0; i < total; i++) {
+                const user = usuariosCadastrados[i];
+                
+                // Atualiza o progresso visual na barra
+                const primeiroNome = user.nome ? user.nome.split(' ')[0] : 'Cliente';
+                progressText.innerText = `A enviar para: ${primeiroNome}...`;
+                progressCount.innerText = `${i + 1} / ${total}`;
+                progressBar.style.width = `${((i + 1) / total) * 100}%`;
+
+                // Só envia se o usuário tiver Token FCM (Aplica a sua lógica original)
+                if (user.fcmToken) {
+                    try {
+                        const response = await fetch(`${API_URL}/notificar`, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json', 
+                                'x-admin-key': adminToken 
+                            },
+                            body: JSON.stringify({ uid: user.uid, titulo, mensagem, tipo })
+                        });
+                        const data = await response.json();
+                        if (data.success) sucessoCount++; else falhaCount++;
+                    } catch (e) { falhaCount++; }
+                } else {
+                    falhaCount++; // Sem token = falha no envio
+                }
+            }
+
+            // Finaliza o envio e exibe o resumo
+            mostrarToast(`Concluído! Sucesso: ${sucessoCount} | Sem App/Falhas: ${falhaCount}`, 'success');
+            
+            // Restaura o botão
+            btn.innerHTML = conteudoOriginalBtn;
+            btn.disabled = false;
+            btn.classList.remove('opacity-70', 'cursor-wait');
+            
+            // Finaliza o aspeto da barra de progresso
+            progressText.innerText = 'TRANSMISSÃO FINALIZADA';
+            
+            // Limpa o formulário de envio e oculta a barra após 4 segundos
+            tituloInput.value = '';
+            mensagemInput.value = '';
+            tipoInput.value = 'info';
+
+            setTimeout(() => {
+                progressContainer.classList.add('hidden');
+                progressBar.style.width = '0%';
+            }, 4000);
+        }
+
+// ------------------------------------------------------------------
+        // CARREGAMENTO DE DADOS (READ) E INTEGRAÇÃO ASAAS
+        // ------------------------------------------------------------------
+        async function carregarUsuarios() {
+            if (!adminLogado) return;
+
+            const statusEl = document.getElementById('status');
+            const btnSync = document.getElementById('btn-sync');
+            const iconSync = document.getElementById('icon-sync');
+            const iconSpinner = document.getElementById('icon-spinner');
+            const textSync = document.getElementById('text-sync');
+
+            btnSync.disabled = true;
+            iconSync.classList.add('hidden');
+            iconSpinner.classList.remove('hidden');
+            if(textSync.classList.contains('sm:inline')) {
+                textSync.innerText = 'A sincronizar...';
+            }
+            statusEl.innerHTML = '<span class="text-indigo-400 animate-pulse font-medium">A consultar base de dados...</span>';
+            
+            try {
+                const response = await fetch(`${API_URL}/users`, { 
+                    headers: { 'x-admin-key': adminToken } 
+                });
+                
+                const data = await response.json();
+
+                if (!data.success) throw new Error(data.error);
+                
+                usuariosCadastrados = data.users;
+                
+                atualizarMetricas();
+                statusEl.innerHTML = `<span class="text-emerald-400 font-medium">✓ Base de dados atualizada.</span>`;
+                aplicarFiltros(); 
+                mostrarToast('Base de dados sincronizada!');
+
+                // 🚀 AQUI ESTÁ A INTEGRAÇÃO: Chama o saldo real do Asaas logo após sincronizar
+                carregarSaldoAsaas();
+
+            } catch (error) {
+                statusEl.innerHTML = `<span class="text-red-400 font-medium">Erro: ${error.message}</span>`;
+                mostrarToast('Falha na ligação com o servidor.', 'error');
+            } finally {
+                btnSync.disabled = false;
+                iconSync.classList.remove('hidden');
+                iconSpinner.classList.add('hidden');
+                textSync.innerText = 'Sincronizar';
+            }
+        }
+
+        function atualizarMetricas() {
+            const saldoTotal = usuariosCadastrados.reduce((acc, user) => acc + (Number(user.saldo) || 0), 0);
+            const limiteTotal = usuariosCadastrados.reduce((acc, user) => acc + (Number(user.limites?.pix) || 0), 0);
+            
+            const pendentes = usuariosCadastrados.filter(user => {
+                return user.status === 'pendente' || (!user.status && !user.limites?.pix && !user.limites?.compras);
+            }).length;
+
+            document.getElementById('metric-users').innerText = usuariosCadastrados.length;
+            document.getElementById('metric-pendentes').innerText = pendentes;
+            document.getElementById('metric-saldo').innerText = formatarMoeda(saldoTotal);
+            document.getElementById('metric-limite').innerText = formatarMoeda(limiteTotal);
+        }
+
+        // 🚀 NOVA FUNÇÃO: Busca o saldo real da sua conta Asaas e substitui no card de Custódia
+        async function carregarSaldoAsaas() {
+            const saldoEl = document.getElementById('metric-saldo');
+            saldoEl.innerText = "A calcular...";
+            saldoEl.classList.add('animate-pulse');
+
+            try {
+                const response = await fetch(`${API_URL}/asaas-balance`, {
+                    headers: { 'x-admin-key': adminToken }
+                });
+                
+                const data = await response.json();
+                
+                saldoEl.classList.remove('animate-pulse');
+                
+                if (data.success) {
+                    // Substitui a soma local pelo Saldo Real da sua conta Asaas
+                    saldoEl.innerText = formatarMoeda(data.saldoAsaas);
+                    // Deixa um verde mais brilhante para indicar que é um dado vivo do Asaas
+                    saldoEl.classList.replace('text-emerald-400', 'text-[#22C55E]'); 
+                } else {
+                    saldoEl.innerText = "Erro Asaas";
+                }
+            } catch (error) {
+                saldoEl.classList.remove('animate-pulse');
+                saldoEl.innerText = "Offline";
+                console.error("Falha ao buscar saldo Asaas", error);
+            }
+        }
+
+// ------------------------------------------------------------------
+        // SISTEMA DE FILTRAGEM, PESQUISA E ORDENAÇÃO (UI PREMIUM)
+        // ------------------------------------------------------------------
+        let timerPesquisa;
+
+        function debouncedSearch() {
+            clearTimeout(timerPesquisa);
+            timerPesquisa = setTimeout(() => {
+                currentPage = 1;
+                aplicarFiltros();
+            }, 300);
+        }
+
+        function setFiltro(tipo) {
+            filtroAtual = tipo;
+            const btns = ['todos', 'pendentes', 'bloqueados'];
+            
+            // Novas classes Premium criadas no nosso HTML (Estilo Pílula iOS)
+            const classeAtiva = 'px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-md transition-all shrink-0 snap-start';
+            const classeInativa = 'px-6 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all border border-transparent shrink-0 snap-start';
+            
+            btns.forEach(b => {
+                const el = document.getElementById(`btn-filtro-${b}`);
+                if (el) {
+                    if (b === tipo) {
+                        el.className = classeAtiva;
+                    } else {
+                        el.className = classeInativa;
+                    }
+                }
+            });
+            
+            currentPage = 1; 
+            aplicarFiltros();
+        }
+
+        function setSort(key) {
+            // 1. Reseta todos os ícones da tabela para o estado invisível
+            document.querySelectorAll('[id^="sort-icon-"]').forEach(el => {
+                el.classList.add('opacity-0');
+                // Remove as cores específicas caso tivessem sido aplicadas
+                el.classList.remove('text-indigo-400', 'text-emerald-400', 'text-fuchsia-400');
+                el.innerText = '↕';
+            });
+
+            // 2. Define a direção da ordenação
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = key === 'nome' ? 'asc' : 'desc'; 
+            }
+
+            // 3. Aplica o ícone e a cor correta dependendo da coluna clicada
+            const activeIcon = document.getElementById(`sort-icon-${key}`);
+            if(activeIcon) {
+                activeIcon.classList.remove('opacity-0');
+                
+                // Cores dinâmicas para combinar com o hover do nosso novo HTML
+                if (key === 'saldo') {
+                    activeIcon.classList.add('text-emerald-400');
+                } else if (key === 'limitePix') {
+                    activeIcon.classList.add('text-fuchsia-400');
+                } else {
+                    activeIcon.classList.add('text-indigo-400');
+                }
+                
+                activeIcon.innerText = sortConfig.direction === 'asc' ? '↑' : '↓';
+            }
+
+            aplicarFiltros();
+        }
+
+        function sanearHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, match => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[match]));
+        }
+
+        function aplicarFiltros() {
+            const searchInput = document.getElementById('search-input');
+            const termo = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            let filtrados = usuariosCadastrados.filter(user => {
+                // Proteção contra campos indefinidos para evitar erro de toLowerCase
+                const nome = (user.nome || '').toLowerCase();
+                const email = (user.email || '').toLowerCase();
+                const cpf = (user.cpf || '');
+
+                const matchTexto = nome.includes(termo) || 
+                                   cpf.includes(termo) ||
+                                   email.includes(termo);
+                                   
+                if (!matchTexto) return false;
+
+                // Lógica de Status
+                const isPendente = user.status === 'pendente' || (!user.status && !user.limites?.pix && !user.limites?.compras);
+                const isBloqueado = user.status === 'bloqueado';
+
+                if (filtroAtual === 'pendentes' && !isPendente) return false;
+                if (filtroAtual === 'bloqueados' && !isBloqueado) return false;
+                
+                return true;
+            });
+
+            // Ordenação segura
+            filtrados.sort((a, b) => {
+                let valA, valB;
+                
+                if (sortConfig.key === 'limitePix') {
+                    valA = Number(a.limites?.pix || 0); 
+                    valB = Number(b.limites?.pix || 0);
+                } else if (sortConfig.key === 'saldo') {
+                    valA = Number(a.saldo || 0); 
+                    valB = Number(b.saldo || 0);
+                } else if (sortConfig.key === 'nome') {
+                    valA = (a.nome || '').toLowerCase(); 
+                    valB = (b.nome || '').toLowerCase();
+                } else {
+                    valA = a.createdAt || 0; 
+                    valB = b.createdAt || 0;
+                }
+                
+                if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            usuariosFiltrados = filtrados;
+            renderizarTabela();
+        }
+
+        // ------------------------------------------------------------------
+        // SISTEMA DE PAGINAÇÃO DA TABELA (LÓGICA INTACTA, UI PREMIUM)
+        // ------------------------------------------------------------------
+        function mudarPagina(delta) {
+            const totalPages = Math.ceil(usuariosFiltrados.length / itemsPerPage);
+            const novaPagina = currentPage + delta;
+            
+            if (novaPagina >= 1 && novaPagina <= totalPages) {
+                currentPage = novaPagina;
+                renderizarTabela();
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderizarTabela();
+        }
+
+        function atualizarControlesPaginacao(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+            
+            const btnPrev = document.getElementById('btn-prev-page');
+            const btnNext = document.getElementById('btn-next-page');
+            const numbersContainer = document.getElementById('pagination-numbers');
+            numbersContainer.innerHTML = ''; 
+
+            if (totalItems === 0) {
+                btnPrev.disabled = true;
+                btnNext.disabled = true;
+                return; 
+            }
+            
+            const infoText = document.getElementById('pagination-info');
+
+            btnPrev.disabled = currentPage === 1;
+            btnNext.disabled = currentPage === totalPages;
+
+            const startIndex = ((currentPage - 1) * itemsPerPage) + 1;
+            const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
+            
+            infoText.innerText = `Mostrando ${startIndex} a ${endIndex} de ${totalItems}`;
+
+            let startPage = Math.max(1, currentPage - 1);
+            let endPage = Math.min(totalPages, startPage + 2);
+            
+            if (endPage - startPage < 2) {
+                startPage = Math.max(1, endPage - 2);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const isActive = i === currentPage;
+                // Design Premium para os botões numéricos da paginação
+                const btnClass = isActive 
+                    ? 'w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shadow-[0_4px_10px_rgba(79,70,229,0.4)] transition-all' 
+                    : 'w-9 h-9 rounded-xl border border-white/5 bg-slate-800/40 hover:bg-slate-700/60 text-slate-400 hover:text-white text-xs font-bold flex items-center justify-center transition-all active:scale-95 shadow-inner';
+                
+                numbersContainer.innerHTML += `
+                    <button onclick="goToPage(${i})" class="${btnClass}">
+                        ${i}
+                    </button>
+                `;
+            }
+        }
+
+        function renderizarTabela() {
+            const tabelaEl = document.getElementById('tabela-usuarios');
+            tabelaEl.innerHTML = '';
+
+            const totalItems = usuariosFiltrados.length;
+            atualizarControlesPaginacao(totalItems);
+
+            // Estado Vazio (Nenhum cliente encontrado)
+            if (totalItems === 0) {
+                tabelaEl.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-16">
+                            <div class="flex flex-col items-center justify-center gap-4">
+                                <div class="w-16 h-16 rounded-full bg-slate-900/80 border border-white/5 flex items-center justify-center text-slate-600 shadow-inner">
+                                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                </div>
+                                <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">Nenhum cliente encontrado.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const itensPagina = usuariosFiltrados.slice(startIndex, endIndex);
+
+            itensPagina.forEach(user => {
+                const isPendente = user.status === 'pendente' || (!user.status && !user.limites?.pix && !user.limites?.compras);
+                const isBloqueado = user.status === 'bloqueado';
+                
+                // Badges de Status com Glassmorphism
+                let statusBadge = '';
+                if (isBloqueado) {
+                    statusBadge = `
+                        <span class="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-md text-[9px] md:text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1.5 shadow-inner">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_5px_rgba(239,68,68,0.8)]"></span> Bloqueado
+                        </span>`;
+                } else if (isPendente) {
+                    statusBadge = `
+                        <span class="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-2.5 py-1 rounded-md text-[9px] md:text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1.5 shadow-inner">
+                            <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_5px_rgba(249,115,22,0.8)]"></span> Em Análise
+                        </span>`;
+                } else {
+                    statusBadge = `
+                        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-md text-[9px] md:text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-1.5 shadow-inner">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.8)]"></span> Ativo
+                        </span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/30 transition-colors group';
+                
+                tr.innerHTML = `
+                    <td class="px-5 md:px-6 py-4">
+                        <div class="flex items-center gap-3 md:gap-4">
+                            <div class="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-slate-800/80 border border-white/5 flex items-center justify-center text-slate-300 font-black uppercase shrink-0 shadow-inner group-hover:text-indigo-400 transition-colors">
+                                ${sanearHTML(user.nome).substring(0,2)}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-bold text-white text-sm truncate">${sanearHTML(user.nome)}</div>
+                                <div class="text-[10px] md:text-xs text-slate-500 mt-0.5 font-medium truncate">${sanearHTML(user.email)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-5 md:px-6 py-4">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <span class="text-slate-400 font-mono text-xs font-medium">${sanearHTML(user.cpf)}</span>
+                            <button onclick="copiarCPF('${sanearHTML(user.cpf)}')" class="text-indigo-400 hover:text-white bg-indigo-500/10 hover:bg-indigo-500 p-1.5 md:p-2 rounded-lg border border-indigo-500/20 transition-all active:scale-90" title="Copiar CPF">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="mt-2.5">${statusBadge}</div>
+                    </td>
+                    <td class="px-5 md:px-6 py-4 text-right">
+                        <span class="font-black ${isPendente ? 'text-slate-500' : 'text-emerald-400 drop-shadow-sm'} text-sm">
+                            ${formatarMoeda(user.saldo)}
+                        </span>
+                    </td>
+                    <td class="px-5 md:px-6 py-4 text-right font-bold text-slate-300 text-sm">
+                        ${formatarMoeda(user.limites?.pix)}
+                    </td>
+                    <td class="px-5 md:px-6 py-4 text-center">
+                        <button onclick="abrirDetalhes('${user.uid}')" class="${isPendente ? 'bg-orange-500 hover:bg-orange-400 text-white shadow-[0_4px_10px_rgba(249,115,22,0.3)] border-transparent' : 'bg-slate-800/50 border-white/5 text-slate-300 hover:text-white hover:bg-slate-700/80 shadow-inner'} border px-4 py-2.5 rounded-xl text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 w-full md:w-auto">
+                            Gerir
+                        </button>
+                    </td>
+                `;
+                
+                tabelaEl.appendChild(tr);
+            });
+        }
+
+        // ------------------------------------------------------------------
+        // SISTEMA DO MODAL GIGANTE (MASTER VIEW - RAIO-X COMPLETO)
+        // ------------------------------------------------------------------
+        function abrirDetalhes(uid) {
+            const user = usuariosCadastrados.find(u => u.uid === uid);
+            if(!user) return;
+
+            const isPendente = user.status === 'pendente' || (!user.status && !user.limites?.pix && !user.limites?.compras);
+
+            document.getElementById('modal-title').innerText = user.nome || 'Cliente sem nome';
+            document.getElementById('modal-email-cpf').innerText = `${user.email || 'Sem E-mail'} | CPF: ${user.cpf || 'Sem CPF'}`;
+            
+            document.getElementById('edit-uid').value = user.uid;
+            document.getElementById('edit-status').value = isPendente ? 'ativo' : (user.status || 'ativo');
+            document.getElementById('edit-nome').value = user.nome || '';
+            document.getElementById('edit-tier').value = user.tier || 'Standard';
+            
+            document.getElementById('push-titulo').value = '';
+            document.getElementById('push-mensagem').value = '';
+            document.getElementById('push-tipo').value = 'info';
+
+            document.getElementById('edit-saldo').value = user.saldo || 0;
+            document.getElementById('edit-limite-pix').value = user.limites?.pix || 0;
+            document.getElementById('edit-limite-compras').value = user.limites?.compras || 0;
+
+            document.getElementById('edit-fatura-valor').value = user.fatura?.valorAtual || 0;
+            document.getElementById('edit-fatura-vencimento').value = user.fatura?.vencimento || '10/03';
+            document.getElementById('edit-fatura-status').value = user.fatura?.status || 'Aberta';
+            document.getElementById('edit-score').value = user.score || 50;
+
+            const btnSalvar = document.getElementById('btn-salvar');
+            const saveText = document.getElementById('save-text');
+            
+            // Design dinâmico do botão (Aprovar = Verde, Guardar = Roxo)
+            if (isPendente) {
+                saveText.innerText = 'Aprovar Crédito';
+                btnSalvar.className = "px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)] active:scale-95 flex items-center justify-center gap-3 w-full md:w-auto";
+            } else {
+                saveText.innerText = 'Guardar Alterações';
+                btnSalvar.className = "px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-fuchsia-500 text-white font-black uppercase tracking-[0.15em] text-[11px] rounded-2xl transition-all shadow-[0_8px_20px_-6px_rgba(79,70,229,0.5)] active:scale-95 flex items-center justify-center gap-3 w-full md:w-auto";
+            }
+
+            const extratoContainer = document.getElementById('extrato-container');
+            extratoContainer.innerHTML = '';
+            
+            // Renderização do Extrato com Glassmorphism
+            if (!user.transacoes || user.transacoes.length === 0) {
+                extratoContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center p-8 border border-dashed border-white/10 rounded-[2rem] bg-slate-950/20 gap-4 mt-2 h-full min-h-[200px]">
+                        <div class="w-12 h-12 rounded-full bg-slate-900/80 flex items-center justify-center text-slate-600 shadow-inner border border-white/5">
+                            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <p class="text-slate-500 text-[11px] font-bold uppercase tracking-widest text-center">Nenhum histórico de transações.</p>
+                    </div>
+                `;
+            } else {
+                user.transacoes.forEach(t => {
+                    const isEntrada = Number(t.valor) > 0;
+                    const corTexto = isEntrada ? 'text-emerald-400 drop-shadow-sm' : 'text-slate-200';
+                    
+                    const iconePositivo = `
+                        <div class="w-10 h-10 rounded-[0.8rem] bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20 shadow-inner">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    `;
+                    const iconeNegativo = `
+                        <div class="w-10 h-10 rounded-[0.8rem] bg-slate-800/80 text-slate-400 flex items-center justify-center shrink-0 border border-white/5 shadow-inner">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    `;
+
+                    const icone = isEntrada ? iconePositivo : iconeNegativo;
+                    
+                    extratoContainer.innerHTML += `
+                        <div class="flex items-center justify-between p-3.5 md:p-4 bg-slate-900/40 rounded-2xl border border-white/5 hover:bg-slate-800/40 transition-colors shadow-sm">
+                            <div class="flex items-center gap-3.5 md:gap-4">
+                                ${icone}
+                                <div>
+                                    <p class="text-[11px] md:text-sm font-bold text-white leading-tight">${t.titulo}</p>
+                                    <p class="text-[9px] md:text-[10px] text-slate-500 uppercase tracking-widest mt-1 font-medium">${t.dataHora || t.data}</p>
+                                </div>
+                            </div>
+                            <p class="font-black ${corTexto} text-sm">${formatarMoeda(t.valor)}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            const modal = document.getElementById('client-modal');
+            const overlay = document.getElementById('modal-overlay');
+            
+            // Trava o scroll do fundo no mobile ao abrir o modal
+            if (window.innerWidth < 768) document.body.classList.add('overflow-hidden');
+            
+            overlay.classList.remove('hidden');
+            modal.classList.remove('hidden');
+            
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                modal.classList.remove('opacity-0', 'scale-95');
+                modal.classList.add('modal-enter');
+            }, 10);
+        }
+
+        function fecharDetalhes() {
+            const isSaving = document.getElementById('btn-salvar').disabled;
+            if (isSaving) return; 
+
+            const modal = document.getElementById('client-modal');
+            const overlay = document.getElementById('modal-overlay');
+            
+            overlay.classList.add('opacity-0');
+            modal.classList.remove('modal-enter');
+            modal.classList.add('modal-exit'); 
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                modal.classList.add('hidden');
+                modal.classList.remove('modal-exit');
+                
+                // Libera o scroll do fundo ao fechar
+                document.body.classList.remove('overflow-hidden');
+            }, 300);
+        }
+
+        async function salvarAlteracoes() {
+            // UX: Recolhe o teclado no mobile ao clicar em salvar
+            if (document.activeElement) document.activeElement.blur();
+
+            const uid = document.getElementById('edit-uid').value;
+            const btn = document.getElementById('btn-salvar');
+            const spinner = document.getElementById('save-spinner');
+            const btnText = document.getElementById('save-text');
+
+            const saldoInput = parseFloat(document.getElementById('edit-saldo').value);
+            const limitePixInput = parseFloat(document.getElementById('edit-limite-pix').value);
+            const limiteComprasInput = parseFloat(document.getElementById('edit-limite-compras').value);
+            const scoreInput = parseInt(document.getElementById('edit-score').value);
+            const faturaValorInput = parseFloat(document.getElementById('edit-fatura-valor').value) || 0;
+
+            if (isNaN(saldoInput) || saldoInput < 0) return mostrarToast('O Saldo não pode ser vazio ou negativo.', 'error');
+            if (isNaN(limitePixInput) || limitePixInput < 0) return mostrarToast('O Limite Pix é inválido.', 'error');
+            if (isNaN(limiteComprasInput) || limiteComprasInput < 0) return mostrarToast('O Limite de Compras é inválido.', 'error');
+            
+            if (isNaN(scoreInput) || scoreInput < 0 || scoreInput > 100) {
+                return mostrarToast('O Score Aura deve estar entre 0 e 100.', 'error');
+            }
+
+            const dadosAtualizados = {
+                status: document.getElementById('edit-status').value,
+                nome: document.getElementById('edit-nome').value,
+                tier: document.getElementById('edit-tier').value,
+                saldo: saldoInput,
+                
+                limites: {
+                    pix: limitePixInput,
+                    compras: limiteComprasInput
+                },
+                
+                score: scoreInput,
+                
+                fatura: {
+                    valorAtual: faturaValorInput,
+                    vencimento: document.getElementById('edit-fatura-vencimento').value,
+                    status: document.getElementById('edit-fatura-status').value
+                }
+            };
+
+            // Loading state premium
+            btn.disabled = true;
+            btn.classList.add('opacity-80', 'cursor-wait');
+            spinner.classList.remove('hidden');
+            btnText.innerText = 'A processar...';
+
+            try {
+                const response = await fetch(`${API_URL}/update-full/${uid}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'x-admin-key': adminToken 
+                    },
+                    body: JSON.stringify(dadosAtualizados)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarToast('Dados guardados com sucesso na Nuvem!', 'success');
+                    
+                    fetch(`${API_URL}/logs`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminToken },
+                        body: JSON.stringify({
+                            acao: 'Edição de Cliente',
+                            detalhes: `O perfil, limites ou saldo foram alterados pelo painel.`,
+                            usuarioAfetado: uid
+                        })
+                    }).catch(e => console.error('Erro ao registar log', e));
+                    
+                    const userIndex = usuariosCadastrados.findIndex(u => u.uid === uid);
+                    if (userIndex !== -1) {
+                        usuariosCadastrados[userIndex] = { ...usuariosCadastrados[userIndex], ...dadosAtualizados };
+                        atualizarMetricas();
+                        aplicarFiltros();
+                    }
+                    
+                    // Fechamento suave com restauração do scroll
+                    const modal = document.getElementById('client-modal');
+                    const overlay = document.getElementById('modal-overlay');
+                    overlay.classList.add('opacity-0');
+                    modal.classList.remove('modal-enter');
+                    modal.classList.add('modal-exit');
+                    
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        modal.classList.add('hidden');
+                        modal.classList.remove('modal-exit');
+                        document.body.classList.remove('overflow-hidden');
+                    }, 300);
+
+                } else {
+                    mostrarToast('Erro ao guardar: ' + data.error, 'error');
+                }
+            } catch (error) {
+                mostrarToast('Erro de ligação ao servidor remoto.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-80', 'cursor-wait');
+                spinner.classList.add('hidden');
+                btnText.innerText = 'Guardar Alterações';
+            }
+        }
+
+       // ------------------------------------------------------------------
+        // SISTEMA DE NAVEGAÇÃO ENTRE SECÇÕES PRINCIPAIS DO ADMIN (UI PREMIUM)
+        // ------------------------------------------------------------------
+function showSection(secao) {
+    // 1. Lista exata de todas as suas IDs de seção
+    const secoesIds = [
+        'section-usuarios', 
+        'section-logs', 
+        'section-broadcast', 
+        'section-config', 
+        'section-banners'
+    ];
+
+    const menusIds = [
+        'menu-usuarios',
+        'menu-logs',
+        'menu-broadcast',
+        'menu-config',
+        'menu-banners'
+    ];
+
+    // 2. Esconde todas as seções de uma vez
+    secoesIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+
+    // 3. Reseta estilos de todos os botões do menu
+    const btnInativo = 'w-full flex items-center gap-3 text-slate-400 hover:bg-slate-800/80 hover:text-white px-4 py-3.5 rounded-xl font-medium text-sm transition-all group';
+    menusIds.forEach(id => {
+        const menuEl = document.getElementById(id);
+        if (menuEl) menuEl.className = btnInativo;
+    });
+
+    // 4. Mostra a seção alvo e configura o Header
+    const targetSection = document.getElementById(`section-${secao}`);
+    const targetMenu = document.getElementById(`menu-${secao}`);
+    const btnSync = document.getElementById('btn-sync');
+    const tituloHeader = document.getElementById('header-title');
+    const btnAtivoBase = 'w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm shadow-inner transition-all group border ';
+
+    if (targetSection) targetSection.classList.remove('hidden');
+
+    // Lógica específica por seção
+    if (secao === 'usuarios') {
+        tituloHeader.innerText = 'Central de Clientes';
+        if (targetMenu) targetMenu.className = btnAtivoBase + 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+        btnSync.setAttribute('onclick', 'carregarUsuarios()');
+        btnSync.classList.remove('hidden');
+    } 
+    else if (secao === 'logs') {
+        tituloHeader.innerText = 'Auditoria';
+        if (targetMenu) targetMenu.className = btnAtivoBase + 'bg-slate-800/80 text-white border-white/10';
+        btnSync.setAttribute('onclick', 'carregarLogs()');
+        btnSync.classList.remove('hidden');
+        carregarLogs();
+    } 
+    else if (secao === 'broadcast') {
+        tituloHeader.innerText = 'Transmissão Global';
+        if (targetMenu) targetMenu.className = btnAtivoBase + 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20';
+        btnSync.classList.add('hidden');
+    } 
+    else if (secao === 'config') {
+        tituloHeader.innerText = 'Configurações do Sistema';
+        if (targetMenu) targetMenu.className = btnAtivoBase + 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        btnSync.setAttribute('onclick', 'carregarTaxas()');
+        btnSync.classList.remove('hidden');
+        carregarTaxas();
+    } 
+    else if (secao === 'banners') {
+        tituloHeader.innerText = 'Banners do App';
+        if (targetMenu) targetMenu.className = btnAtivoBase + 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+        btnSync.setAttribute('onclick', 'carregarBanners()');
+        btnSync.classList.remove('hidden');
+        carregarBanners();
+    }
+
+    // Mobile UX: Fecha a sidebar
+    if(window.innerWidth < 768) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+            toggleSidebar();
+        }
+    }
+}
+
+        // ------------------------------------------------------------------
+        // SISTEMA DE LOGS DE AUDITORIA (READ LOGS DO FIREBASE - UI PREMIUM)
+        // ------------------------------------------------------------------
+        async function carregarLogs() {
+            if (!adminLogado) return;
+            
+            const tabelaLogs = document.getElementById('tabela-logs');
+            
+            // Estado de Carregamento Premium
+            tabelaLogs.innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-6 py-16">
+                        <div class="flex flex-col items-center justify-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 animate-spin border border-indigo-500/20 shadow-inner">
+                                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"></path></svg>
+                            </div>
+                            <p class="text-indigo-400/80 font-black tracking-widest uppercase text-[10px] animate-pulse">A sincronizar auditoria...</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            
+            try {
+                const response = await fetch(`${API_URL}/logs`, { 
+                    headers: { 'x-admin-key': adminToken } 
+                });
+                
+                const data = await response.json();
+
+                if (data.success) {
+                    tabelaLogs.innerHTML = '';
+                    
+                    // Estado Vazio Premium
+                    if(!data.logs || data.logs.length === 0) {
+                        tabelaLogs.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="px-6 py-20">
+                                    <div class="flex flex-col items-center justify-center gap-4">
+                                        <div class="w-16 h-16 rounded-full bg-slate-900/80 flex items-center justify-center text-slate-600 border border-white/5 shadow-inner">
+                                            <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        </div>
+                                        <p class="text-slate-500 font-bold uppercase tracking-widest text-[11px]">O histórico de auditoria está vazio.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    data.logs.forEach(log => {
+                        let dataFormatada = 'Data Desconhecida';
+                        if (log.data && log.data._seconds) {
+                            dataFormatada = new Date(log.data._seconds * 1000).toLocaleString('pt-BR');
+                        } else if (log.data) {
+                            dataFormatada = new Date(log.data).toLocaleString('pt-BR');
+                        }
+
+                        // Lógica para colorir a linha baseado na palavra-chave da Ação
+                        let acaoColor = "text-indigo-400";
+                        let bgIcon = "bg-indigo-500/10 border-indigo-500/20";
+                        let iconSvg = `<path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>`; // Lápis (Edição)
+                        
+                        const acaoLower = (log.acao || '').toLowerCase();
+                        
+                        if(acaoLower.includes('bloque') || acaoLower.includes('exclu') || acaoLower.includes('suspen')) {
+                            acaoColor = "text-red-400"; 
+                            bgIcon = "bg-red-500/10 border-red-500/20";
+                            iconSvg = `<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>`;
+                        } else if (acaoLower.includes('aprov') || acaoLower.includes('ativ') || acaoLower.includes('liberad')) {
+                            acaoColor = "text-emerald-400"; 
+                            bgIcon = "bg-emerald-500/10 border-emerald-500/20";
+                            iconSvg = `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>`;
+                        } else if (acaoLower.includes('push') || acaoLower.includes('alert') || acaoLower.includes('notifica')) {
+                            acaoColor = "text-fuchsia-400"; 
+                            bgIcon = "bg-fuchsia-500/10 border-fuchsia-500/20";
+                            iconSvg = `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>`;
+                        }
+
+                        tabelaLogs.innerHTML += `
+                            <tr class="hover:bg-slate-800/30 transition-colors group border-b border-white/5 last:border-0">
+                                <td class="px-6 py-5 text-[11px] font-mono text-slate-400 font-medium">
+                                    <div class="flex items-center gap-2">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" class="text-slate-600 group-hover:text-indigo-400 transition-colors" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                        ${dataFormatada}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5 text-sm font-black ${acaoColor}">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center border ${bgIcon} shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">${iconSvg}</svg>
+                                        </div>
+                                        ${log.acao || 'Ação do Sistema'}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5 text-xs text-slate-300">
+                                    <p class="truncate max-w-[200px] md:max-w-sm font-medium" title="${log.detalhes || ''}">${log.detalhes || 'Sem detalhes fornecidos.'}</p>
+                                    <span class="text-[9px] text-slate-500 font-mono font-bold mt-1.5 inline-flex bg-slate-950/50 px-2.5 py-1 rounded-md border border-white/5 shadow-inner">
+                                        ${log.usuarioAfetado ? `UID: ${log.usuarioAfetado}` : 'Ação de Sistema / Global'}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5 text-xs font-bold text-slate-400">
+                                    <div class="flex items-center gap-2 bg-slate-950/40 w-fit px-3 py-1.5 rounded-xl border border-white/5 shadow-inner">
+                                        <div class="w-4 h-4 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        </div>
+                                        ${log.admin || 'Admin'}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    mostrarToast('Auditoria sincronizada com sucesso!', 'success');
+                    
+                } else {
+                    tabelaLogs.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-red-400 font-bold text-xs uppercase tracking-widest">Erro do servidor: ${data.error}</td></tr>`;
+                }
+            } catch (e) {
+                tabelaLogs.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-red-400 font-bold text-xs uppercase tracking-widest">Falha de ligação com a VPS.</td></tr>`;
+            }
+        }
+// ------------------------------------------------------------------
+        // GESTÃO DE TAXAS DO SISTEMA (MOTOR DE CRÉDITO - UI PREMIUM)
+        // ------------------------------------------------------------------
+        async function carregarTaxas() {
+            if (!adminLogado) return;
+            try {
+                const response = await fetch(`${API_URL}/taxas`, { headers: { 'x-admin-key': adminToken } });
+                const data = await response.json();
+                if (data.success && data.taxas) {
+                    document.getElementById('config-taxa-standard').value = data.taxas.Standard;
+                    document.getElementById('config-taxa-gold').value = data.taxas.Gold;
+                    document.getElementById('config-taxa-platinum').value = data.taxas.Platinum;
+                }
+            } catch (error) {
+                mostrarToast('Erro ao carregar configurações de taxas do servidor.', 'error');
+            }
+        }
+
+        async function salvarTaxas() {
+            // Mobile UX: Recolhe o teclado numérico imediatamente
+            if (document.activeElement) document.activeElement.blur();
+
+            const btn = document.getElementById('btn-save-taxas');
+            
+            const std = document.getElementById('config-taxa-standard').value;
+            const gld = document.getElementById('config-taxa-gold').value;
+            const plt = document.getElementById('config-taxa-platinum').value;
+
+            if (!std || !gld || !plt) {
+                return mostrarToast('Preencha todas as taxas antes de guardar.', 'error');
+            }
+
+            // Feedback Visual: Guarda o visual original do botão
+            const conteudoOriginalBtn = btn.innerHTML;
+            
+            // Bloqueia e mostra o spinner animado
+            btn.disabled = true;
+            btn.classList.add('opacity-80', 'cursor-wait');
+            btn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>A GUARDAR...</span>
+            `;
+
+            try {
+                const response = await fetch(`${API_URL}/taxas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-admin-key': adminToken },
+                    body: JSON.stringify({ Standard: std, Gold: gld, Platinum: plt })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarToast('Taxas de Juros atualizadas com sucesso!', 'success');
+                } else {
+                    mostrarToast('Erro ao guardar: ' + data.error, 'error');
+                }
+            } catch (error) {
+                mostrarToast('Falha na comunicação com o servidor remoto.', 'error');
+            } finally {
+                // Restaura o botão ao estado original perfeitamente
+                btn.innerHTML = conteudoOriginalBtn;
+                btn.disabled = false;
+                btn.classList.remove('opacity-80', 'cursor-wait');
+            }
+        }
+
+// ==========================================
+        // 🚀 LÓGICA DO CREATIVE STUDIO (BANNERS - UI PREMIUM)
+        // ==========================================
+        let bannersAtuais = []; // Variável Mestra
+
+        // 1. CARREGA OS BANNERS DA NUVEM QUANDO ABRE O PAINEL
+        async function carregarBanners() {
+            try {
+                // ATENÇÃO: Mantive o seu IP da VPS intacto para não quebrar o endpoint
+                const response = await fetch('http://72.61.222.214:3001/api/banners');
+                const data = await response.json();
+                if (data.success) {
+                    bannersAtuais = data.banners || [];
+                    renderizarBanners();
+                }
+            } catch (e) {
+                console.error("Erro ao puxar banners da nuvem:", e);
+            }
+        }
+
+        // 2. DESENHA OS BANNERS NA TELA (OU MOSTRA O AVISO VAZIO)
+        function renderizarBanners() {
+            const grid = document.getElementById('lista-banners-render');
+            const emptyState = document.getElementById('banners-empty-state');
+            
+            if (!grid || !emptyState) return;
+
+            grid.innerHTML = '';
+            
+            if (bannersAtuais.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            bannersAtuais.forEach((b, index) => {
+                grid.innerHTML += `
+                    <div class="bg-slate-900/40 border border-white/5 rounded-[2rem] overflow-hidden group hover:bg-slate-800/40 transition-all duration-300 shadow-inner">
+                        <div class="h-36 md:h-40 bg-slate-950/80 w-full overflow-hidden relative shadow-[inset_0_-10px_20px_rgba(0,0,0,0.5)]">
+                            <img src="${b.img}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" onerror="this.src='https://placehold.co/1280x560/0B1120/4F46E5?text=Imagem+com+Erro'">
+                            
+                            <div class="absolute top-3 left-3 w-8 h-8 rounded-xl bg-[#020617]/80 backdrop-blur-xl text-indigo-400 text-xs font-black flex items-center justify-center border border-white/10 shadow-lg">
+                                ${index + 1}
+                            </div>
+
+                            <div class="absolute inset-0 bg-[#020617]/70 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-sm">
+                                <button onclick="removerBanner(${index})" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-[0_8px_20px_-6px_rgba(239,68,68,0.5)] active:scale-95 transition-all flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round"></path></svg>
+                                    Excluir Banner
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-5 flex items-center justify-between border-t border-white/5 bg-slate-950/20">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Link de Destino</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-md bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shrink-0">
+                                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round"/></svg>
+                                    </div>
+                                    <p class="text-[11px] text-slate-300 truncate font-semibold">${b.link || 'Sem link configurado'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. PREVIEW DA IMAGEM
+        function atualizarPreviewBanner() {
+            const url = document.getElementById('novo-banner-img').value.trim();
+            const container = document.getElementById('banner-preview-container');
+            const img = document.getElementById('banner-preview-img');
+
+            if (url && (url.startsWith('http') || url.startsWith('https'))) {
+                img.src = url;
+                container.classList.remove('hidden');
+                img.onerror = () => { container.classList.add('hidden'); mostrarToast('A URL inserida não parece ser uma imagem válida.', 'error'); }; 
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        // 4. ADICIONA NA FILA
+        function adicionarBanner() {
+            const imgInput = document.getElementById('novo-banner-img');
+            const linkInput = document.getElementById('novo-banner-link');
+            
+            const img = imgInput.value.trim();
+            const link = linkInput.value.trim();
+            
+            if (document.activeElement) document.activeElement.blur(); // Mobile UX
+            
+            if (!img) return mostrarToast('Por favor, insira a URL da imagem para o banner.', 'error');
+            
+            bannersAtuais.push({ img, link, id: Date.now() });
+            
+            imgInput.value = '';
+            linkInput.value = '';
+            document.getElementById('banner-preview-container').classList.add('hidden');
+            
+            renderizarBanners();
+            mostrarToast('Banner adicionado! Não se esqueça de clicar em "Publicar Alterações".', 'info');
+        }
+
+        // 5. REMOVE DA FILA
+        function removerBanner(index) {
+            bannersAtuais.splice(index, 1);
+            renderizarBanners();
+            mostrarToast('Banner removido da fila local.', 'info');
+        }
+
+        // 6. PUBLICA NA NUVEM (FIREBASE)
+        async function salvarBanners() {
+            if (document.activeElement) document.activeElement.blur(); // Mobile UX
+            
+            const btn = document.getElementById('btn-save-banners');
+            
+            // Feedback Visual de Loading
+            const conteudoOriginalBtn = btn.innerHTML;
+            btn.disabled = true;
+            btn.classList.add('opacity-80', 'cursor-wait');
+            btn.innerHTML = `
+                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>A PUBLICAR...</span>
+            `;
+
+            try {
+                // AQUI GARANTIMOS QUE USA O IP DA VPS E A ROTA CORRETA
+                const response = await fetch('http://72.61.222.214:3001/api/admin/banners', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-admin-key': adminToken },
+                    body: JSON.stringify({ banners: bannersAtuais })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarToast('Sucesso! Banners sincronizados com a Aplicação.', 'success');
+                } else {
+                    mostrarToast('Erro ao salvar no servidor.', 'error');
+                }
+            } catch (e) {
+                mostrarToast('Falha na conexão com a VPS.', 'error');
+            } finally {
+                // Restaura o botão original
+                btn.innerHTML = conteudoOriginalBtn;
+                btn.disabled = false;
+                btn.classList.remove('opacity-80', 'cursor-wait');
+            }
+        }
+
+        // 7. INICIA O CARREGAMENTO AUTOMÁTICO ASSIM QUE O PAINEL ABRE
+        window.addEventListener('load', carregarBanners);
+
+    </script>
+</body>
+</html>
