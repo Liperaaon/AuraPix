@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  /* Paleta oficial AURA */
+  --color-primary: #6366F1;
+  --color-secondary: #0F172A;
+  --color-background: #020617;
+  --color-card: #0F172A;
+  --color-border: #1E293B;
+
+  --color-highlight: #22C55E;
+
+  --color-text: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+}
+
+:root {
+  background: linear-gradient(
+    180deg,
+    #020617 0%,
+    #020617 40%,
+    #030B1A 100%
+  );
+
+  color: var(--color-text);
+}
+
+body {
+  margin: 0;
+  font-family: 'Geist', system-ui, sans-serif;
+  background: transparent;
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
